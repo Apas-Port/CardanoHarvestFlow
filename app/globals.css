@@ -1,0 +1,357 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --color-primary: #E6B95F; 
+  --color-secondary: #325AB4;
+  --color-dark-blue: #0D1146;
+  --color-navy: #1E1E6E;
+  --color-tertiary: #CADBE8;
+  --color-grey: #B2B2B2;
+  --color-grey-light: #E0E0E0;
+  --color-grey-super-light: #E7EFF7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-function-pro), var(--font-noto-sans-jp), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --breakpoint-xl: 75rem; /* 1200px */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+
+/* カスタムユーティリティクラスの定義 */
+@layer utilities {
+  /* カスタムフォント */
+  .font-function-pro {
+    font-family: var(--font-function-pro);
+  }
+
+  .font-noto-sans-jp {
+    font-family: var(--font-noto-sans-jp);
+  }
+
+  /* カスタムカラー */
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+  .text-dark-blue {
+    color: var(--color-dark-blue);
+  }
+  .bg-dark-blue {
+    background-color: var(--color-dark-blue);
+  }
+  .text-navy {
+    color: var(--color-navy);
+  }
+  .bg-navy {
+    background-color: var(--color-navy);
+  }
+  .text-tertiary {
+    color: var(--color-tertiary);
+  }
+  .bg-tertiary {
+    background-color: var(--color-tertiary);
+  }
+  .text-grey {
+    color: var(--color-grey);
+  }
+  .bg-grey {
+    background-color: var(--color-grey);
+  }
+  .text-grey-light {
+    color: var(--color-grey-light);
+  }
+  .bg-grey-light {
+    background-color: var(--color-grey-light);
+  }
+  .text-grey-super-light {
+    color: var(--color-grey-super-light);
+  }
+  .bg-grey-super-light {
+    background-color: var(--color-grey-super-light);
+  }
+
+  .text-header { font-size: 15px; line-height: 15px; }
+  .text-heading1 { font-size: 54px; line-height: 60px; }
+  .text-heading1Smaller { font-size: 50px; line-height: 60px; }
+  .text-heading2_43 { font-size: 43px; line-height: 48px; }
+  .text-heading2 { font-size: 40px; line-height: 48px; }
+  .text-heading2AnimationTitle { font-size: 40px; line-height: 58px; }
+  .text-heading3_36 { font-size: 36px; line-height: 40px; }
+  .text-heading3_34 { font-size: 34px; line-height: 40px; }
+  .text-heading3 { font-size: 32px; line-height: 40px; }
+  .text-heading3_32_44 { font-size: 32px; line-height: 44px; }
+  .text-heading4_28_44 { font-size: 28px; line-height: 44px; }
+  .text-heading4_28_38 { font-size: 28px; line-height: 38px; }
+  .text-heading4_30_30 { font-size: 30px; line-height: 30px; }
+  .text-heading4 { font-size: 26px; line-height: 30px; }
+  .text-heading4SmallerLH34 { font-size: 24px; line-height: 34px; }
+  .text-heading4Smaller { font-size: 24px; line-height: 28px; }
+
+  .text-heading5Larger24_30 { font-size: 24px; line-height: 30px; }
+  .text-heading5Larger23_30 { font-size: 23px; line-height: 30px; }
+  .text-heading5Larger { font-size: 22px; line-height: 32px; }
+  .text-heading5 { font-size: 22px; line-height: 28px; }
+  .text-heading5LH22 { font-size: 22px; line-height: 22px; }
+
+  .text-heading5Smaller { font-size: 20px; line-height: 30px; }
+  .text-heading5SmallerLH28 { font-size: 20px; line-height: 28px; }
+  .text-heading5SmallerLH26 { font-size: 20px; line-height: 26px; }
+  .text-heading5SmallerLH24 { font-size: 20px; line-height: 24px; }
+
+  .text-bodyLarge { font-size: 18px; line-height: 26px; }
+  .text-bodyLarge24 { font-size: 18px; line-height: 24px; }
+  .text-body17 { font-size: 17px; line-height: 24px; }
+  .text-body16_18 { font-size: 16px; line-height: 18px; }
+  .text-body16 { font-size: 16px; line-height: 24px; }
+
+  .text-bodyJapanese { font-size: 15px; line-height: 34px; }
+  .text-body15_26 { font-size: 15px; line-height: 26px; }
+  .text-body15_20 { font-size: 15px; line-height: 20px; }
+  .text-body15_18 { font-size: 15px; line-height: 18px; }
+  .text-body15_15 { font-size: 15px; line-height: 15px; }
+  .text-body { font-size: 15px; line-height: 23px; }
+
+  .text-body14_24 { font-size: 14px; line-height: 24px; }
+  .text-body14 { font-size: 14px; line-height: 18px; }
+
+  .text-bodySmaller { font-size: 13px; line-height: 23px; }
+  .text-bodySmaller_13_20 { font-size: 13px; line-height: 20px; }
+  .text-bodySmaller_13_18 { font-size: 13px; line-height: 18px; }
+  .text-bodySmaller_13_15 { font-size: 13px; line-height: 15px; }
+
+  .text-caption_12_22 { font-size: 12px; line-height: 22px; }
+  .text-caption { font-size: 12px; line-height: 14px; }
+  .text-captionMedium_11_20 { font-size: 11px; line-height: 20px; }
+  .text-captionMedium { font-size: 11px; line-height: 15px; }
+  .text-captionSmall { font-size: 10px; line-height: 12px; }
+
+  /* ========================
+     Animation & Keyframes
+     ======================== */
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes modalScaleIn {
+    from { 
+      opacity: 0; 
+      transform: scale(0.95) translateZ(0);
+    }
+    to { 
+      opacity: 1; 
+      transform: scale(1) translateZ(0);
+    }
+  }
+
+  @keyframes modalScaleOut {
+    from { 
+      opacity: 1; 
+      transform: scale(1) translateZ(0);
+    }
+    to { 
+      opacity: 0; 
+      transform: scale(0.95) translateZ(0);
+    }
+  }
+
+  @keyframes glow {
+    0%, 100% {
+      filter: drop-shadow(0 0 4px rgba(38, 195, 147, 0.6)) drop-shadow(0 0 8px rgba(38, 195, 147, 0.4));
+    }
+    50% {
+      filter: drop-shadow(0 0 6px rgba(0, 213, 148, 0.8)) drop-shadow(0 0 12px rgba(0, 213, 148, 0.6)) drop-shadow(0 0 16px rgba(38, 195, 147, 0.3));
+    }
+  }
+
+  @keyframes glowPulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 3px rgba(38, 195, 147, 0.4)) drop-shadow(0 0 6px rgba(38, 195, 147, 0.2));
+      transform: scale(1) translateZ(0);
+    }
+    50% {
+      filter: drop-shadow(0 0 5px rgba(0, 213, 148, 0.6)) drop-shadow(0 0 10px rgba(0, 213, 148, 0.4)) drop-shadow(0 0 15px rgba(38, 195, 147, 0.2));
+      transform: scale(1.015) translateZ(0);
+    }
+  }
+
+  @keyframes dropdownIn {
+    from {
+      opacity: 0;
+      transform: scaleY(0.8) translateY(-8px);
+      transform-origin: top;
+    }
+    to {
+      opacity: 1;
+      transform: scaleY(1) translateY(0);
+      transform-origin: top;
+    }
+  }
+
+  @keyframes dropdownOut {
+    from {
+      opacity: 1;
+      transform: scaleY(1) translateY(0);
+      transform-origin: top;
+    }
+    to {
+      opacity: 0;
+      transform: scaleY(0.8) translateY(-8px);
+      transform-origin: top;
+    }
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  @keyframes dotPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+
+  .animate-fade {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-fadeOut {
+    animation: fadeOut 0.5s ease-in-out;
+  }
+
+  .animate-modal-in {
+    animation: modalScaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-modal-out {
+    animation: modalScaleOut 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    will-change: transform, filter;
+  }
+
+  .animate-dropdown-in {
+    animation: dropdownIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-dropdown-out {
+    animation: dropdownOut 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-ripple {
+    animation: ripple 2s ease-out infinite;
+  }
+
+  .animate-dot-pulse {
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+
+  .ripple-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+  }
+
+  .ripple-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-primary); /* #E6B95F */
+    border-radius: 50%;
+    z-index: 3;
+  }
+
+  .ripple-ring {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--color-primary);
+    border-radius: 50%;
+    z-index: 1;
+  }
+
+  .ripple-ring:nth-child(2) {
+    animation-delay: 0s;
+  }
+
+  .ripple-ring:nth-child(3) {
+    animation-delay: 0.7s;
+  }
+
+  /* スクロールバーを隠すためのクラス */
+  .scrollbar-hide {
+    /* Chrome, Safari, Edge */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  @keyframes loading-fade {
+    0% { opacity: 0.2; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.2; }
+  }
+
+  .animate-loading-fade {
+    animation: loading-fade 2s ease-in-out infinite;
+  }
+}

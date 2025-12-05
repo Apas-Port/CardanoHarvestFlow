@@ -1,0 +1,11 @@
+{
+  "name": "hf-cli",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hf": "node hf-cli.cjs"
+  },
+  "dependencies": {
+    "@blockfrost/blockfrost-js": "^6.0.0"
+  }
+}

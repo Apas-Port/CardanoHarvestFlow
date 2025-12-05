@@ -1,0 +1,96 @@
+{
+  "minting": {
+    "description": "Configuration for NFT minting fees and requirements",
+    "networks": {
+      "mainnet": {
+        "baseFee": {
+          "amount": 2000000,
+          "unit": "lovelace",
+          "description": "Base fee for minting transaction (2 ADA)"
+        },
+        "minUtxo": {
+          "amount": 1500000,
+          "unit": "lovelace",
+          "description": "Minimum UTXO requirement for NFT (1.5 ADA)"
+        },
+        "transactionFee": {
+          "amount": 200000,
+          "unit": "lovelace",
+          "description": "Estimated transaction fee (0.2 ADA)"
+        },
+        "totalRequired": {
+          "amount": 3700000,
+          "unit": "lovelace",
+          "description": "Total ADA required for minting (3.7 ADA)"
+        }
+      },
+      "preprod": {
+        "baseFee": {
+          "amount": 2000000,
+          "unit": "lovelace",
+          "description": "Base fee for minting transaction (2 ADA)"
+        },
+        "minUtxo": {
+          "amount": 1500000,
+          "unit": "lovelace",
+          "description": "Minimum UTXO requirement for NFT (1.5 ADA)"
+        },
+        "transactionFee": {
+          "amount": 200000,
+          "unit": "lovelace",
+          "description": "Estimated transaction fee (0.2 ADA)"
+        },
+        "totalRequired": {
+          "amount": 3700000,
+          "unit": "lovelace",
+          "description": "Total ADA required for minting (3.7 ADA)"
+        }
+      }
+    },
+    "collections": {
+      "HARVEST_FLOW": {
+        "specialFee": {
+          "amount": 1200000,
+          "unit": "lovelace",
+          "description": "Special fee for HARVEST FLOW collection (5 ADA)"
+        },
+        "discount": {
+          "percentage": 0,
+          "description": "Discount percentage for special collections"
+        }
+      },
+      "default": {
+        "specialFee": {
+          "amount": 0,
+          "unit": "lovelace",
+          "description": "No special fee for regular NFTs"
+        }
+      }
+    },
+    "bulkMinting": {
+      "enabled": true,
+      "discounts": [
+        {
+          "minQuantity": 1,
+          "maxQuantity": 5,
+          "discountPercentage": 0
+        },
+        {
+          "minQuantity": 6,
+          "maxQuantity": 10,
+          "discountPercentage": 10
+        },
+        {
+          "minQuantity": 11,
+          "maxQuantity": 20,
+          "discountPercentage": 15
+        },
+        {
+          "minQuantity": 21,
+          "maxQuantity": null,
+          "discountPercentage": 20
+        }
+      ]
+    }
+  }
+}

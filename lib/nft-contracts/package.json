@@ -1,0 +1,48 @@
+{
+  "name": "nft-contracts",
+  "version": "1.0.0",
+  "description": "description",
+  "main": "./dist/index.cjs",
+  "browser": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**"
+  ],
+  "author": "",
+  "scripts": {
+    "build": "tsup index.ts --format esm,cjs --dts",
+    "clean": "rm -rf .turbo && rm -rf dist && rm -rf node_modules",
+    "dev": "tsup index.ts --format esm,cjs --watch --dts",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "pack": "npm pack --pack-destination=./dist",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "globals": "^15.13.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.17.0"
+  },
+  "dependencies": {
+    "@blockfrost/blockfrost-js": "^5.7.0",
+    "@meshsdk/common": "1.7.23",
+    "@meshsdk/core": "1.7.23",
+    "@meshsdk/core-csl": "1.7.23",
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0"
+  }
+}

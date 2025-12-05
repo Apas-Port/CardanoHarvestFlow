@@ -1,0 +1,349 @@
+{
+  "meta": {
+    "title": "ハーベストフロー | トゥクトゥク融資プラットフォーム",
+    "description": "東南アジアのトゥクトゥクドライバー支援を通じて社会的インパクトと金銭的リターンを実現する暗号資産貸付サービス"
+  },
+  "header": {
+    "services": "サービス",
+    "cryptoLending": "暗号資産レンディング",
+    "customWrapping": "車体広告サービス",
+    "myAccount": "マイアカウント",
+    "wrapWorkshop": "ラップワークショップ",
+    "disconnectWallet": "ウォレット接続解除",
+    "connectWallet": "ウォレット接続",
+    "language": "言語"
+  },
+  "footer": {
+    "services": "サービス",
+    "cryptoLending": "暗号資産レンディング",
+    "customWrapping": "車体広告サービス",
+    "legal": "法的事項",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsConditions": "利用規約",
+    "updates": "最新情報",
+    "joinMailingList": "メーリングリストに登録",
+    "sendAnEnquiry": "お問い合わせ",
+    "copyright": "Copyright © Apas Port Co., Ltd 2025. All rights reserved.",
+    "producedBy": "Produced by Apas Port :)"
+  },
+  "faq": {
+      "title": "よくある質問",
+      "description": "HARVEST FLOWについての質問がありますか？よくある質問とその回答を以下でご確認ください。",
+      "items": {
+        "1": {
+          "question": "HARVEST FLOWのサービスの仕組みは？",
+          "answer": "HARVEST FLOWは、一定期間お客様の暗号資産をお預かりし、契約期間終了時に同じ種類・同じ数量の暗号資産に加え、固定利率で計算されたレンディング手数料をお返しするサービスです。日本の法律に基づいた暗号資産貸借（消費貸借）サービスで、安心・安全にご利用いただけます。"
+        },
+        "2": {
+          "question": "他のレンディングサービスとHARVEST FLOWの違いは？",
+          "answer": "HARVEST FLOWは、安定したリターンと社会的インパクトの両立を目指す革新的なレンディングサービスです。実世界のプロジェクト（RWA）への貸付を通じ、社会課題の解決にも貢献します。この「リターン」と「社会貢献」の両立を『Social Action』と呼び、HARVEST FLOWの中核ミッションとしています。"
+        },
+        "3": {
+          "question": "暗号資産を持っていなくても利用できますか？",
+          "answer": "HARVEST FLOWの利用には、各プロジェクトで指定された暗号資産を保有している必要があります。"
+        },
+        "4": {
+          "question": "契約期間中に途中解約はできますか？",
+          "answer": "原則として途中解約はできません。ただし、支援の証として発行されるNFT（Proof of Support）は、OpenSeaやMagic Edenなどの外部マーケットプレイスで取引可能です。なお、HARVEST FLOWはコレクションページの作成やロイヤリティ設定などのサポートは行いますが、二次流通取引への関与や保証は行いません。"
+        },
+        "5": {
+          "question": "レンディング手数料はどう計算されますか？",
+          "answer": "レンディング手数料は基本的に以下の式で計算されます：\n\n利息 ＝ 貸付単位数に相当する同種暗号資産数量 × 貸付利率 × \n（プロジェクト定義の実行時点から、NFT保有者の請求時刻までの秒数（ただし貸付期間終了後は終了時点まで）） ÷ (60×60×24×365) \n− これまでにNFT保有者へ支払済みの利息\n\n利息の支払頻度・時期・利率はプロジェクトごとに異なります。詳細は各プロジェクトページをご確認ください。"
+        },
+        "6": {
+          "question": "質問やサポートはどこで受けられますか？",
+          "answer": "質問はHARVEST HALLの<a href='https://discord.gg/harvesthall' target='_blank' rel='noopener noreferrer'>Discord</a>でお気軽にどうぞ。"
+        }
+      }
+    },
+  
+  "contact": {
+    "title": "HARVEST FLOWを通じて新しいソーシャルアクションに参加しましょう。",
+    "button": "プロジェクトを選択"
+  },
+  "item": {
+    "sell": {
+      "enquire-now": "今すぐお問い合わせ"
+    },
+    "purchase": {
+      "title": "カスタムラップクーポン",
+      "button": {
+        "buy": "購入",
+        "comingSoon": "近日公開",
+        "noLongerAvailable": "販売終了",
+        "sending": "送信中...",
+        "confirming": "確認中..."
+      },
+      "transactionStatus": {
+        "txHash": "トランザクションハッシュ: ",
+        "waiting": "確認を待っています...",
+        "confirmed": "購入が確認されました！"
+      },
+      "termsAndPrivacy": {
+        "agreementText": "続行することにより、",
+        "termsLink": "利用規約",
+        "andText": "および",
+        "privacyLink": "プライバシーポリシー"
+      }
+    }
+  },
+  "modals": {
+    "purchase": { 
+      "title": "支援する",
+      "financialReturns": "金銭的リターン",
+      "socialImpact": "社会的インパクト",
+      "interestEarned": "獲得利息",
+      "interestRate": "利率",
+      "repaymentMethod": "返済方法",
+      "lendingPeriod": "プロジェクト期間",
+      "startDate": "開始日",
+      "proofOfSupport": "Proof of Support (POS)",
+      "supportAndReceive": "",
+      "supportAndReceiveEnd": "手に入れましょう",
+      "raisedToDate": "これまでの調達額",
+      "thankYouInterest": "ご関心をお寄せいただき、ありがとうございます。",
+      "projectReachedGoal": "このプロジェクトは十分な貸付を調達し、目標に達しました！",
+      "support": "金額",
+      "quantity": "数量",
+      "quantityDecrease": "数量を減らす",
+      "quantityIncrease": "数量を増やす",
+      "cancel": "キャンセル",
+      "buyNow": "支援する",
+      "usdValue": "(${amount})",
+      "eachPosSymbol": "POSは、あなたの貢献と社会的インパクトを象徴するビジュアルシンボルです。見せて、共有して、誇れる存在としてデザインされています。",
+      "featuresArtwork": "による特別なアートが付属します。",
+      "symbolOfContribution": "NFTは現実世界のインパクトを証明する応援証明書（Proof of Support）として機能します。",
+
+              "milestoneLabels": {
+          "first": "第1",
+          "second": "第2",
+          "third": "第3", 
+          "ordinal": "第{number}"
+        },
+        "milestoneProgress": {
+          "prefix": "このプロジェクトの",
+          "middle": "マイルストーンまで残り",
+          "suffix": "です。この金額により約",
+          "end": "の支援が可能となります。"
+        },
+      "tooltips": {
+        "plumeBoost": "このプロジェクトを支援すると、Plumeポイントとバッジが獲得できます。Plumeポータルでご確認ください。",
+        "proofOfSupport": "POSはあなたの貢献とインパクトを示すシンボルです。誰でも見て、共有し、称賛できる形でデザインされています。",
+        "lendingPeriod": "プロジェクト期間中でもNFTは二次流通マーケットで自由に売買できます。"
+      },
+      "months": "ヶ月間"
+    },
+      "projectWaitingList": {
+        "title": "このプロジェクトは近日公開予定です。",
+        "description": "このプロジェクトはまもなく開始されます。",
+        "description2": "詳細はDiscordとメールでお知らせします。\n最新情報を受け取りたい方は、下記からご登録ください。",
+        "joinButton": "メールリストに登録する"
+      },
+      "transactionSuccess": {
+    "title": "ご支援ありがとうございます",
+    "description": "支援の証であるNFT（Proof of Support）はあなたのアカウントに表示されます。",
+    "description2": "利息や元本を受け取るには、いつでもアカウントページからHARVEST（請求）できます。",
+    "goToAccount": "アカウントへ移動",
+    "joinDiscord": "Discordに参加する"
+  },
+  "waitingTransaction": {
+    "confirmTransaction": "トランザクションを確認",
+    "total": "合計",
+    "name": "プロジェクト名",
+    "noItems": "数量",
+    "transactionSteps": "取引の流れ",
+    "collapseSteps": "ステップを閉じる",
+    "expandSteps": "ステップを表示する",
+    "step1Title": "トークン利用の承認",
+    "step1Description": "レンディングコントラクトにトークン使用の許可を与えます。これは一度きりの承認で、資産は安全かつご自身の管理下にあります。",
+    "step2Title": "トークンをレンディング",
+    "step2Description": "トークンをレンディング状態に入れて、プロジェクトの支援を開始します。",
+    "lowOnPusd": "pUSDのスワップはこちら",
+    "cancel": "キャンセル",
+    "continue": "続行"
+  },
+  "mailingList": {
+      "title": "メーリングリストに参加",
+      "description": "新しいプロジェクトの情報、ローンチスケジュール、各プロジェクトの進捗状況などを随時お届けします。",
+      "emailPlaceholder": "メールアドレス",
+      "namePlaceholder": "名前",
+      "walletPlaceholder": "ウォレットアドレス",
+      "cancel": "キャンセル",
+      "submit": "送信",
+      "submitting": "送信中...",
+      "success": "ご登録ありがとうございます！",
+      "successDescription": "メーリングリストに追加されました",
+      "close": "閉じる"
+    },
+    "confirmTransaction": {
+      "title": "トランザクションを確認",
+      "labelName": "名前",
+      "labelItems": "アイテム数",
+      "labelTotal": "合計",
+      "statusBuying": "購入中",
+      "buttonCancel": "キャンセル",
+      "buttonContinue": "続行"
+    },
+    "wrongNetwork": {
+      "title": "間違ったネットワークが検出されました",
+      "messagePrefix": "続行するには、ウォレットを",
+      "messageSuffix": "ネットワークに切り替えてください。",
+      "buttonSwitch": "ネットワークを切り替え"
+    }
+  },
+  "top": {
+    "nav": {
+      "projects": "Projects",
+      "about": "About",
+      "how": "How it works",
+      "artists": "Artists",
+      "faqs": "FAQ"
+    },
+    "hero": {
+      "title1": "新興国の未来をドライブする",
+      "title2": "東南アジアのトゥクトゥクローン事業"
+    },
+    "stats": {
+      "projects": "プロジェクト数",
+      "totalValueLoaned": "総ローン額",
+      "tuktuks": "稼働中のトゥクトゥク数"
+    },
+    "projects": {
+      "heading": "プロジェクト",
+      "ariaList": "プロジェクト一覧の横スクロール",
+      "ariaScrollRight": "右にスクロール"
+    },
+    "about": {
+      "initiative": "プロジェクトについて",
+        "lead1": "眠っている資産で安定したリターンを得ながら、社会にも貢献しませんか？暗号資産を貸し出すことで、東南アジアの成長するマイクロファイナンス市場に参加し、リアルな社会変革の原動力になれます。",
+        "lead2": "多くの人にとって、トゥクトゥクは単なる移動手段ではなく、貧困から抜け出すための道です。あなたの支援で東南アジアのドライバーたちは、念願のマイカー購入のための金融サービスにアクセスできます。",
+        "col1": {
+          "title": "金融の壁を壊し、自立への一歩を",
+          "p1": "トゥクトゥクは東南アジア各国で欠かせない交通手段です。カンボジアでは約8万台が毎年600万人以上の観光客と地元の人々の足となっています。しかし、多くのドライバーは低所得や地方出身のため、銀行の融資を受けられずマイカーを持つことが困難です。",
+          "p2": "HARVEST FLOWはこの課題を解決し、ドライバーが自分の力で経済的自立を目指せる仕組みを提供しています。"
+        },
+        "col2": {
+          "title": "あなたの暗号資産がもたらす力",
+          "p1": "カンボジア経済は年7%成長と急拡大していますが、地方の人々はその恩恵を受けにくいのが現状です。あなたの投資は、ドライバーが月収400ドル（平均の3倍）を稼げる道を開きます。",
+          "p2": "子供を学校に通わせたり、貧困から抜け出したり、ドライバーたちの人生は変わり始めています。貸し出しは単なるリターン以上の価値を生みます。",
+          "p3": "実際の人々、実際の資産、実際のマーケットです。"
+        },
+        "col3": {
+          "videoLabel": "ドライバーからの声"
+        },
+        "col4": {
+          "title": "ブロックチェーンで守る安心のレンディング",
+          "p1": "日本のFinTech企業、Global Mobility Service (GMS)と提携し、IoTとクラウド技術を活用して安全かつ効果的なレンディングを実現。リアルタイムで車両を追跡するMobility-Cloud Connecting Systemと、融資審査を行うMobility Service Financial Platformで、金融サービスから取り残された層にも適切な融資が可能です。",
+          "p2": "2023年10月からカンボジアで100台以上のトゥクトゥクに資金提供し、デフォルト率はほぼゼロ。あなたの投資も安心して運用できます。モビリティと金融の新しい形を共につくりましょう。"
+        }
+      },
+    "video": {
+      "clickToUnmute": "クリックして音声をオン",
+      "videos": {
+        "1": {
+          "title": "Plume Tuktuks",
+          "description": "Plume Tuktuksは、Plume NetworkとHARVEST FLOWのパートナーシップから生まれた金融包摂プロジェクトです。\n\nカンボジアを皮切りに、2,000万ドル規模のトゥクトゥクローンを展開し、車両へのアクセスと経済的な自立の機会をドライバーに提供します。\n\nPlumeユーザーはシンプルなオンチェーン体験を通じて、資産を増やしながらリアルな社会貢献にも参加できます。"
+        },
+        "2": {
+          "title": "Dour Darcels Tuktuks",
+          "description": "Dour Darcels Tuktuksは、Dour Darcels NFTとHARVEST FLOWによる、カンボジア・プノンペン発のソーシャルインパクトプロジェクトです。\n\nレンディングを通じて88台のトゥクトゥクをドライバーに提供し、生活の安定と自立を支援します。\n\nNFTホルダーはCustom Wrap Voucherを購入することで、自分のNFTをトゥクトゥクにラッピングし、現地ドライバーを応援しながらDour Darcelsのアートを街中に広げることができます。"
+        }
+      }
+    },
+    "ecosystem": {
+      "title": "仕組みについて"
+    },
+    "artists": {
+      "title": "Proof Of Support Artists",
+      "izumidaLee": {
+        "name": "IZUMIDA LEE",
+        "bio": "1986年、北海道生まれ。幼少期から絵を描き始める。アメリカ留学時に絵を学ぶ。2015年より東京に拠点を移し、2019年より本格的に絵描きとしての活動をスタート。アクリル画の作品を中心に、看板や宣伝美術、ウィンドウに用いられる絵や文字を描いている。"
+      },
+      "momokaIto": {
+        "name": "MOMOKA ITO",
+        "bio": "宮城県生まれ。2021年東北芸術工科大学芸術学部美術科日本画コース卒業。日本画で培ったものの見方や精神性を軸に、枠にとらわれない自由な表現を追求している。2022年にNFTに挑戦。普段は絵画教室で子どもたちと関わりながら、国内外を問わず個展やグループ展などで作品を発表している。"
+      }
+    },
+    "contact": {
+      "title": "新しいプロジェクトやローンチの\n最新情報をいち早くお届けします。",
+      "description": "HARVEST FLOWについての最新の状況やメール限定の情報をお届けします。ぜひメーリングリストにご登録ください。",
+      "emailPlaceholder": "メールアドレス",
+      "joinButton": "メール登録"
+    }
+  },
+  "account": {
+    "dashboard": {
+      "title": "ダッシュボード",
+      "totalEquity": "総資産価値（USD）",
+      "yourApr": "あなたのAPR",
+      "totalLending": "総貸付額",
+      "totalHarvested": "総回収額"
+    },
+    "claimableAmount": {
+      "title": "請求可能額（USD）",
+      "total": "合計",
+      "harvestButton": "今すぐ回収"
+    },
+    "userHistory": {
+      "title": "ユーザー履歴",
+      "type": "タイプ",
+      "price": "価格", 
+      "project": "プロジェクト",
+      "tx": "TX",
+      "time": "時間"
+    },
+    "sidebarNavigation": {
+      "dashboard": "ダッシュボード",
+      "userHistory": "ユーザー履歴",
+      "repaymentHistory": "返済履歴",
+      "proofOfSupport": "Proof of Support (POS)"
+    },
+    "proofOfSupport": {
+      "title": "Proof of Support (POS)",
+      "cambodiaTuktukLoan": "カンボジア・トゥクトゥク融資",
+      "apr": "APR",
+      "lending": "貸付",
+      "harvest": "回収"
+    },
+    "repaymentHistory": {
+      "title": "返済履歴",
+      "selectProject": "プロジェクトを選択",
+      "paymentAmount": "支払額（USD）",
+      "progressMessage": "進捗メッセージ"
+    }
+  },
+  "proof": {
+    "assetOverview": {
+      "title": "資産概要",
+      "loadingAssetData": "資産データを読み込み中...",
+      "totalMileage": "総走行距離",
+      "totalTravelTime": "総走行時間",
+      "averageSpeed": "平均速度",
+      "status": "ステータス"
+    },
+    "harvest": {
+      "title": "回収",
+      "loading": "読み込み中...",
+      "totalEquity": "総資産価値",
+      "totalLending": "総貸付額",
+      "totalHarvested": "総回収額",
+      "claimableAmount": "請求可能額",
+      "claimablePrinciple": "請求可能元本",
+      "yourApr": "あなたのAPR"
+    },
+    "rwaData": {
+      "title": "RWAデータ",
+      "loadingRwaData": "RWAデータを読み込み中...",
+      "totalHoursWorked": "総労働時間",
+      "thisWeek": "今週",
+      "lastWeek": "先週",
+      "totalMileageDriven": "総走行距離"
+    },
+    "sidebar": {
+      "proofOfSupport": "Proof of Support (POS)",
+      "harvest": "回収",
+      "assetOverview": "資産概要",
+      "rwaData": "RWAデータ"
+    }
+  }
+}

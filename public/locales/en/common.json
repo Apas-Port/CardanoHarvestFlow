@@ -1,0 +1,348 @@
+{
+  "meta": {
+    "title": "Create Next App",
+    "description": "Generated with create next app"
+  },
+  "header": {
+    "services": "Services",
+    "cryptoLending": "Lending Projects",
+    "customWrapping": "Custom Wrapping",
+    "myAccount": "My Portfolio",
+    "wrapWorkshop": "Wrap Vouchers",
+    "disconnectWallet": "Disconnect Wallet",
+    "connectWallet": "Connect Wallet",
+    "language": "Language"
+  },
+  "footer": {
+    "services": "Services",
+    "cryptoLending": "Lending Projects",
+    "customWrapping": "Custom Wrapping",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsConditions": "Terms & Conditions",
+    "updates": "Updates",
+    "joinMailingList": "Join Mailing List",
+    "sendAnEnquiry": "Send an Enquiry",
+    "enquire": "Inquire",
+    "copyright": "Copyright © Apas Port Co., Ltd 2025. All rights reserved.",
+    "producedBy": "Produced by Apas Port :)"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "description": "Have questions about HARVEST FLOW? Take a look at the answers to our most frequently asked questions below.",
+    "items": {
+      "1": {
+        "question": "What is the structure of the HARVEST FLOW service?",
+        "answer": "HARVEST FLOW is a service in which we hold your crypto assets for a fixed period and return the same quantity and type of crypto assets at the end of the contract term, along with lending fees calculated at a fixed rate. It is a crypto asset lending (loan-for-consumption) service provided in accordance with Japanese law, ensuring a safe and reliable experience for our users."
+      },
+      "2": {
+        "question": "How is HARVEST FLOW different from other lending services?",
+        "answer": "HARVEST FLOW is an innovative lending service that aims to achieve both profitability and social impact by lending to real-world projects (RWAs) that aim to improve the world. We call this combination of generating stable income and contributing to society a \"Social Action,\" which is a core mission of HARVEST FLOW in building a sustainable future."
+      },
+      "3": {
+        "question": "Can I use HARVEST FLOW if I don't own any crypto assets?",
+        "answer": "To use HARVEST FLOW, you need to hold the specific crypto asset designated in each project."
+      },
+      "4": {
+        "question": "Can I cancel the lending contract before the end of the term?",
+        "answer": "In principle, early termination is not allowed. However, since the Proof of Support is issued as an NFT, it can be traded on external marketplaces such as OpenSea or Magic Eden. While HARVEST FLOW may assist with creating collection pages or setting royalties, it does not participate in or guarantee any secondary market transactions."
+      },
+      "5": {
+        "question": "How is the lending fee calculated?",
+        "answer": "The lending fee is generally calculated using the formula below:\n\nInterest =  \n(Quantity of the same type of crypto asset corresponding to the number of lending units) × (Lending fee rate) ×  \nSeconds from the project's defined execution time to the time when the request is received from the Proof of Support (NFT) holder  \n(If that time is after the project's lending period has ended, calculation is capped at the end of the lending period) ÷ (60×60×24×365)  \n− Lending fees already paid by us to the Proof of Support holder\n\nThe payout frequency, timing, and fee rate vary by project. Please refer to each project page for details."
+      },
+      "6": {
+        "question": "Where can I ask questions or get support?",
+        "answer": "Please ask your questions in HARVEST HALL's <a href='https://discord.gg/harvesthall' target='_blank' rel='noopener noreferrer'>Discord</a>."
+      }
+    }
+  },
+  "contact": {
+    "title": "Join a new social action through HARVEST FLOW.",
+    "button": "Select a Project"
+  },
+  "item": {
+    "sell": {
+      "enquire-now": "Inquire Now"
+    },
+    "purchase": {
+      "title": "CUSTOM WRAP COUPON",
+      "button": {
+        "buy": "Buy",
+        "comingSoon": "Coming Soon",
+        "noLongerAvailable": "No Longer Available",
+        "sending": "Sending...",
+        "confirming": "Confirming..."
+      },
+      "transactionStatus": {
+        "txHash": "Tx Hash: ",
+        "waiting": "Waiting for confirmation...",
+        "confirmed": "Purchase Confirmed!"
+      },
+      "termsAndPrivacy": {
+        "agreementText": "By continuing, you agree to the",
+        "termsLink": "Terms and conditions",
+        "andText": "and",
+        "privacyLink": "Privacy Policy"
+      }
+    }
+  },
+  "modals": {
+    "purchase": { 
+      "title": "Lend Support",
+      "financialReturns": "Financial Returns",
+      "socialImpact": "Social Impact",
+      "interestEarned": "INTEREST EARNED",
+      "interestRate": "INTEREST RATE",
+      "repaymentMethod": "REPAYMENT METHOD",
+      "lendingPeriod": "PROJECT LENGTH",
+      "startDate": "START DATE",
+      "supportAndReceive": "Support and receive a",
+      "raisedToDate": "Project Raised",
+      "thankYouInterest": "Thank you for your interest.",
+      "projectReachedGoal": "This project has raised enough lending and reached its goal!",
+      "support": "Support",
+      "quantity": "Quantity",
+      "quantityDecrease": "Decrease quantity",
+      "quantityIncrease": "Increase quantity",
+      "cancel": "Cancel",
+      "buyNow": "Lend Support",
+      "usdValue": "(${amount})",
+      "eachPosSymbol": "Each POS acts as a visual symbol of your contribution and impact – made to be seen, shared, and celebrated.",
+      "featuresArtwork": "A special NFT featuring exclusive artwork by",
+      "symbolOfContribution": "This acts as your Proof of Support for the Project — backing real-world impact through crypto lending.",
+
+        "milestoneLabels": {
+          "first": "first",
+          "second": "second", 
+          "third": "third",
+          "ordinal": "{number}th"
+        },
+        "milestoneProgress": {
+          "prefix": "We're",
+          "middle": "away from reaching the",
+          "suffix": "milestone of this project – this amount is estimated to support",
+          "end": "."
+        },
+      "tooltips": {
+        "plumeBoost": "Get rewarded with Plume Points and a badge when you support this project. Redeem through the portal.",
+        "proofOfSupport": "Each POS acts as a visual symbol of your contribution and impact – made to be seen, shared, and celebrated.",
+        "lendingPeriod": "You are free to buy and sell the NFT on the secondary market even during the project period."
+      },
+      "months": "MONTHS"
+    },
+    "projectWaitingList": {
+      "title": "This project is coming soon.",
+      "description": "This project is coming soon.",
+      "description2": "More details will be shared via Discord and Email. \nSubscribe below to stay updated.",
+      "joinButton": "Join Mailing list"
+    },
+    "transactionSuccess": {
+      "title": "Thank you for your contribution.",
+      "description": "Proof of Support NFT will be displayed in your account.",
+      "description2": "To HARVEST (Claim interest & principle), visit the Account page at any time.",
+      "goToAccount": "Go to Account Page",
+      "joinDiscord": "Join Discord"
+    },
+    "waitingTransaction": {
+      "confirmTransaction": "Confirm Transaction",
+      "total": "Total",
+      "name": "Name",
+      "noItems": "NO. ITEMS",
+      "transactionSteps": "Transaction steps",
+      "collapseSteps": "Collapse steps",
+      "expandSteps": "Expand steps",
+      "step1Title": "Approve token spending",
+      "step1Description": "Grant permission for the lending contract to use your tokens. This is a one-time approval that keeps your assets safe and under your control.",
+      "step2Title": "Lend your tokens",
+      "step2Description": "Deposit your tokens into the lending state to start supporting the project.",
+      "lowOnPusd": "Low on ADA? Bridge or swap from",
+      "cancel": "Cancel",
+      "continue": "Continue"
+    },
+    "mailingList": {
+      "title": "Join the mailing list",
+      "description": "We share updates on new projects, launch schedules, and how each project is moving forward.",
+      "emailPlaceholder": "Email Address",
+      "namePlaceholder": "Name",
+      "walletPlaceholder": "Wallet Address",
+      "cancel": "CANCEL",
+      "submit": "SUBSCRIBE",
+      "submitting": "Submitting...",
+      "success": "Thank you for registering!",
+      "successDescription": "You've been added to the mailing list",
+      "close": "CLOSE"
+    },
+    "confirmTransaction": {
+      "title": "Confirm Transaction",
+      "labelName": "Name",
+      "labelItems": "Number of Items",
+      "labelTotal": "Total",
+      "statusBuying": "Purchasing",
+      "buttonCancel": "Cancel",
+      "buttonContinue": "Continue"
+    },
+    "wrongNetwork": {
+      "title": "Wrong Network Detected",
+      "messagePrefix": "Please switch your wallet to the",
+      "messageSuffix": "network to continue.",
+      "buttonSwitch": "Switch Network"
+    }
+  },
+
+  "top": {
+    "nav": {
+      "projects": "Projects",
+      "about": "About",
+      "how": "How it works",
+      "artists": "Artists",
+      "faqs": "FAQs"
+    },
+    "hero": {
+      "title1": "Driving the future of emerging countries",
+      "title2": "Tuktuk loan business in Southeast Asia"
+    },
+    "stats": {
+      "projects": "Projects",
+      "totalValueLoaned": "Total Value Loaned",
+      "tuktuks": "Tuktuks on the road"
+    },
+    "projects": {
+      "heading": "Projects",
+      "ariaList": "Project list horizontal scroll",
+      "ariaScrollRight": "Scroll right"
+    },
+    "about": {
+      "initiative": "About initiative",
+      "lead1": "Want to earn steady returns on your dormant assets while making a positive impact? By lending your crypto, you can tap into Southeast Asia's growing microfinance market and fuel real transformation.",
+      "lead2": "For many, a tuktuk is more than just transport—it’s a way out of poverty. You can assist tuktuk drivers in Southeast Asia access the financial services they need to own their vehicles.",
+      "col1": {
+        "title": "Break barriers, build financial freedom",
+        "p1": "Tuktuks are an essential part of the lifestyle in many Southeast Asian countries. In Cambodia, 80,000 vehicles service locals and 6 million tourists annually. Despite that, many drivers from low-income or rural backgrounds are unable to access loans to own their tuktuks due to traditional banking barriers.",
+        "p2": "HARVEST FLOW breaks this cycle by offering tailored loans, empowering drivers to achieve financial independence and build brighter futures."
+      },
+      "col2": {
+        "title": "The power of your crypto",
+        "p1": "Cambodia's economy is soaring with 7% GDP growth, but rural communities are often left behind. Your investment builds the foundations for financial independence, enabling tuktuk drivers to earn up to $400 monthly—triple the average income.",
+        "p2": "Drivers share stories of sending kids to school and escaping poverty. By lending, you’re not just earning returns—you’re creating life-changing opportunities.",
+        "p3": "Real people, real assets, real markets."
+      },
+      "col3": {
+        "videoLabel": "A message from the drivers"
+      },
+      "col4": {
+        "title": "Secure lending through blockchain",
+        "p1": "Partnering with Global Mobility Service (GMS), a Japanese FinTech pioneer, we use IoT and cloud technology to make lending secure and impactful. The Mobility-Cloud Connecting System tracks tuktuks in real-time, while the Mobility Service Financial Platform assesses credit risk for underserved drivers.",
+        "p2": "Since October 2023, we've financed over 100 tuktuks in Cambodia with a near-zero default rate, ensuring your investment is safe and effective. Join a service that’s redefining mobility and finance."
+      }
+    },
+    "video": {
+      "clickToUnmute": "Click to unmute",
+      "videos": {
+        "1": {
+          "title": "Plume Tuktuks",
+          "description": "Plume Tuktuks is a financial inclusion project powered by the partnership between Plume Network and HARVEST FLOW.\n\nStarting in Cambodia, the project aims to deploy a $20 million tuktuk loan initiative to continue providing access to vehicles and opportunities for economic independence through crypto lending.\n\nPlume users can participate through a simple on-chain experience, growing their assets while driving real-world social impact."
+        },
+        "2": {
+          "title": "Dour Darcels Tuktuks",
+          "description": "Dour Darcels Tuktuks is a social impact initiative by Dour Darcels NFT and HARVEST FLOW, based in Phnom Penh, Cambodia.\n\nThe project supports a fleet of 88 tuktuks to drivers from underserved communities by providing vehicles through a lending model that helps sustain their livelihoods.\n\nDour Darcel NFT holders can get involved by purchasing Custom Wrap Vouchers—turning their NFTs into real tuktuk wraps. It’s a fun way to bring IP to the streets and drive meaningful impact for local drivers."
+        }
+      }
+    },
+    "ecosystem": {
+      "title": "How It Works"
+    },
+    "artists": {
+      "title": "Proof Of Support Artists",
+      "izumidaLee": {
+        "name": "IZUMIDA LEE",
+        "bio": "Born in Hokkaido in 1986. Izumida Lee began drawing at a young age and studied art while living in the United States.  In 2015, she relocated to Tokyo and launched her career as an artist in 2019. Her work primarily focuses on acrylic paintings, signboards, advertising art, and illustrations and text for window displays."
+      },
+      "momokaIto": {
+        "name": "MOMOKA ITO",
+        "bio": "Born in Miyagi Prefecture. Graduated from Tohoku University of Art & Design in 2021 with a degree in Japanese Painting. Drawing on the unique perspective and mindset cultivated through Japanese painting, they pursue free and unrestricted forms of expression. In 2022, they began exploring NFTs. While working with children at an art school, they continue to showcase their work in solo and group exhibitions both in Japan and abroad."
+      }
+    },
+    "contact": {
+      "title": "Be the first to know about new\nprojects and launches.",
+      "description": "Subscribe to our mailing list for updates on new projects, launch schedules, and and how each project is moving forward.",
+      "emailPlaceholder": "Email address",
+      "joinButton": "Join Mailing list"
+    }
+  },
+  "account": {
+    "dashboard": {
+      "title": "DASHBOARD",
+      "totalEquity": "Total Equity (USD)",
+      "yourApr": "Your APR",
+      "totalLending": "Total Lending",
+      "totalHarvested": "Total Harvested"
+    },
+    "claimableAmount": {
+      "title": "Claimable Amount (USD)",
+      "total": "Total",
+      "harvestButton": "HARVEST NOW"
+    },
+    "userHistory": {
+      "title": "USER HISTORY",
+      "type": "TYPE",
+      "price": "PRICE", 
+      "project": "PROJECT",
+      "tx": "TX",
+      "time": "TIME"
+    },
+    "sidebarNavigation": {
+      "dashboard": "Dashboard",
+      "userHistory": "User History",
+      "repaymentHistory": "Repayment History",
+      "proofOfSupport": "Proof of Support"
+    },
+    "proofOfSupport": {
+      "title": "PROOF OF SUPPORT",
+      "cambodiaTuktukLoan": "CAMBODIA TUKTUK LOAN",
+      "apr": "APR",
+      "lending": "LENDING",
+      "harvest": "HARVEST"
+    },
+    "repaymentHistory": {
+      "title": "Repayment history",
+      "selectProject": "Select Project",
+      "paymentAmount": "Payment Amount (USD)",
+      "progressMessage": "Progress message"
+    }
+  },
+  "proof": {
+    "assetOverview": {
+      "title": "ASSET OVERVIEW",
+      "loadingAssetData": "Loading asset data...",
+      "totalMileage": "Total Mileage",
+      "totalTravelTime": "Total Travel Time",
+      "averageSpeed": "Average Speed",
+      "status": "Status"
+    },
+    "harvest": {
+      "title": "HARVEST",
+      "loading": "Loading...",
+      "totalEquity": "Total Equity",
+      "totalLending": "Total Lending",
+      "totalHarvested": "Total Harvested",
+      "claimableAmount": "Claimable Amount",
+      "claimablePrinciple": "Claimable Principle",
+      "yourApr": "Your APR"
+    },
+    "rwaData": {
+      "title": "RWA DATA",
+      "loadingRwaData": "Loading RWA data...",
+      "totalHoursWorked": "Total hours worked",
+      "thisWeek": "This week",
+      "lastWeek": "last week",
+      "totalMileageDriven": "Total mileage driven"
+    },
+    "sidebar": {
+      "proofOfSupport": "PROOF OF SUPPORT",
+      "harvest": "HARVEST",
+      "assetOverview": "ASSET OVERVIEW",
+      "rwaData": "RWA DATA"
+    }
+  }
+}
