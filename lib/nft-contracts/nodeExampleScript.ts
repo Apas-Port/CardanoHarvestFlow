@@ -218,14 +218,6 @@ export const nodeExampleScript = async () => {
     const paramUtxo = JSON.parse(await fs.readFile('paramUtxo.json', {encoding: 'utf-8'}));
     console.log('paramUtxo loaded from disk: ', paramUtxo);
 
-    const metadataJsonPath = process.env.MINT_METADATA_JSON_PATH;
-    if (metadataJsonPath === undefined) {
-      throw new Error("MINT_METADATA_JSON_PATH is undefined, but required.");
-    }
-    const metadataJson = JSON.parse(await fs.readFile(metadataJsonPath, {encoding: 'utf-8'}));
-    console.log('metadataJson: ', metadataJson);
-
-
     // by now, everything should be initialized, and we can start minting NFTs
     // bake the parameters into the contracts
     const contractBakedWithCollectionNameAndParamUtxo = new MeshPlutusNFTContract(

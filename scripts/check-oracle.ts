@@ -45,9 +45,27 @@ async function checkOracle() {
       console.log(`   - Price: ${mintStatus.lovelacePrice / 1_000_000} ADA`);
     } else {
       console.error('❌ Oracle Error:', mintStatus.error);
-      if (mintStatus.error.includes('Oracle UTxO not found')) {
+      console.error('   Status Code:', mintStatusResponse.status);
+      if (mintStatus.details) {
+        console.error('   Details:', JSON.stringify(mintStatus.details, null, 2));
+      }
+      if (mintStatus.error && mintStatus.error.includes('Oracle UTxO not found')) {
         console.log('\n⚠️  Oracle needs to be initialized!');
         console.log('   Run: npm run init -- --project=' + projectId);
+      } else if (mintStatus.error && mintStatus.error.includes('Project not found')) {
+        console.log('\n⚠️  Project not found!');
+        console.log('   Check if project ID "' + projectId + '" exists in dev-projects.json');
+      } else if (mintStatus.error && mintStatus.error.includes('Failed to fetch oracle data')) {
+        console.log('\n⚠️  Failed to fetch oracle data!');
+        console.log('   This might indicate:');
+        console.log('   1. Oracle UTxO not found (Oracle not initialized)');
+        console.log('   2. Network configuration issue');
+        console.log('   3. Blockfrost API issue');
+        if (mintStatus.details) {
+          console.log('   Oracle Address:', mintStatus.details.oracleAddress);
+          console.log('   Network:', mintStatus.details.network);
+        }
+        console.log('   Try running: npm run init -- --project=' + projectId);
       }
       return;
     }

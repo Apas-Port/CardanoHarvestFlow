@@ -115,6 +115,22 @@ import {
       }
       return undefined;
     };
+
+    protected waitForCollateral = async (wallet: MeshWallet, attempts = 10, delayMs = 3_000): Promise<boolean> => {
+      for (let i = 0; i < attempts; i += 1) {
+        try {
+          const collateral = await wallet.getCollateral();
+          if (collateral && collateral.length > 0) {
+            return true;
+          }
+        } catch (error) {
+          console.warn('[MeshPlutusNFTContract] Failed to query collateral while waiting', error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+      return false;
+    };
   
     protected getWalletUtxosWithMinLovelace = async (
       lovelace: number,
@@ -191,7 +207,18 @@ import {
     ) => {
       let utxos: UTxO[] = userUtxos;
       if (this.fetcher && userUtxos.length === 0) {
-        utxos = await this.fetcher.fetchAddressUTxOs(walletAddress);
+        // Pass assetHex to fetcher if it's CustomBlockfrostFetcher to use asset-specific endpoint
+        if (typeof (this.fetcher as any).fetchAddressUTxOs === 'function') {
+          try {
+            utxos = await (this.fetcher as any).fetchAddressUTxOs(walletAddress, assetHex);
+          } catch (error) {
+            // Fallback to fetching all UTxOs if asset-specific fetch fails
+            console.warn('[getAddressUtxosWithToken] Asset-specific fetch failed, falling back to all UTxOs:', error);
+            utxos = await (this.fetcher as any).fetchAddressUTxOs(walletAddress);
+          }
+        } else {
+          utxos = await this.fetcher.fetchAddressUTxOs(walletAddress);
+        }
       }
       // utxos.forEach(utxo => {
       //   utxo.output.amount.forEach(amount => {
@@ -213,13 +240,57 @@ import {
   
     protected getWalletInfoForTx = async () => {
       const utxos = await this.wallet?.getUtxos();
-      const collateral = await this.getWalletCollateral();
+      let collateral = await this.getWalletCollateral();
       const walletAddress = await this.getWalletDappAddress();
       if (!utxos || utxos?.length === 0) {
         throw new Error("No utxos found");
       }
       if (!collateral) {
-        throw new Error("No collateral found");
+        // Create collateral if it doesn't exist (only for MeshWallet)
+        if (this.wallet && 'createCollateral' in this.wallet) {
+          console.log("No collateral found. Creating collateral...");
+          try {
+            // Check wallet balance before creating collateral
+            const walletUtxos = await this.wallet.getUtxos();
+            if (!walletUtxos || walletUtxos.length === 0) {
+              throw new Error("Cannot create collateral: Wallet has no UTxOs. Please add ADA to your wallet first.");
+            }
+            
+            const txHash = await (this.wallet as MeshWallet).createCollateral();
+            console.log(`Collateral transaction submitted: ${txHash}`);
+            
+            const collateralReady = await this.waitForCollateral(this.wallet as MeshWallet);
+            if (!collateralReady) {
+              throw new Error("Collateral creation transaction submitted but collateral UTxO not available yet. Try again once the transaction is confirmed.");
+            }
+            
+            console.log("Collateral UTxO confirmed.");
+            collateral = await this.getWalletCollateral();
+            
+            if (!collateral) {
+              throw new Error("Collateral creation was submitted but UTxO not detected yet. Try again once the transaction is confirmed.");
+            }
+          } catch (error) {
+            // If it's already our custom error, propagate it as-is
+            if (error instanceof Error && (
+              error.message.includes("Collateral creation") ||
+              error.message.includes("Cannot create collateral") ||
+              error.message.includes("not available yet")
+            )) {
+              throw error;
+            }
+            // For other errors (like transaction validation errors), provide more context
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorDetails = error instanceof Error && 'data' in error 
+              ? JSON.stringify((error as any).data, null, 2) 
+              : '';
+            throw new Error(
+              `Failed to create collateral: ${errorMessage}${errorDetails ? `\nDetails: ${errorDetails}` : ''}`
+            );
+          }
+        } else {
+          throw new Error("No collateral found. Please set up collateral in your wallet (Settings → Collateral) or use MeshWallet to auto-create it.");
+        }
       }
       if (!walletAddress) {
         throw new Error("No wallet address found");
@@ -772,8 +843,19 @@ import {
               max_mints: getIntegerValue(maxMints) as bigint
             });
 
+      // Extract lovelace from oracleUtxo.output.amount to preserve it in the output
+      const oracleLovelace = oracleUtxo.output.amount.find(
+        (asset: { unit: string; quantity: string }) => asset.unit === "lovelace"
+      );
+      
+      const oracleOutputAmount = [{ unit: oracleNftPolicyId, quantity: "1" }];
+      if (oracleLovelace) {
+        oracleOutputAmount.push(oracleLovelace);
+      }
+
       const tx = this.mesh
         .spendingPlutusScriptV3()
+        .requiredSignerHash(deserializeAddress(feeCollectorAddress).pubKeyHash)
         .txIn(
           oracleUtxo.input.txHash,
           oracleUtxo.input.outputIndex,
@@ -783,14 +865,10 @@ import {
         .txInRedeemerValue(mOracleRedeemer(onOrOff ? "EnableNFTMinting" : "DisableNFTMinting"))
         .txInScript(this.getOracleCbor())
         .txInInlineDatumPresent()
-        .txOut(this.oracleAddress, [{ unit: oracleNftPolicyId, quantity: "1" }])
+        .txOut(this.oracleAddress, oracleOutputAmount)
         .txOutInlineDatumValue(updatedOracleDatum, "JSON")
 
-
       tx
-        .txOut(feeCollectorAddress, [
-          { unit: "lovelace", quantity: lovelacePrice.toString() },
-        ])
         .txInCollateral(
           collateral.input.txHash,
           collateral.input.outputIndex,
@@ -846,6 +924,16 @@ import {
               max_mints: getIntegerValue(maxMints) as bigint
             });
 
+      // Extract lovelace from oracleUtxo.output.amount to preserve it in the output
+      const oracleLovelace = oracleUtxo.output.amount.find(
+        (asset: { unit: string; quantity: string }) => asset.unit === "lovelace"
+      );
+      
+      const oracleOutputAmount = [{ unit: oracleNftPolicyId, quantity: "1" }];
+      if (oracleLovelace) {
+        oracleOutputAmount.push(oracleLovelace);
+      }
+
       const tx = this.mesh
         .spendingPlutusScriptV3()
         .requiredSignerHash(deserializeAddress(feeCollectorAddress).pubKeyHash)
@@ -858,7 +946,7 @@ import {
         .txInRedeemerValue(mOracleRedeemer(onOrOff ? "EnableNFTTrading" : "DisableNFTTrading"))
         .txInScript(this.getOracleCbor())
         .txInInlineDatumPresent()
-        .txOut(this.oracleAddress, [{ unit: oracleNftPolicyId, quantity: "1" }])
+        .txOut(this.oracleAddress, oracleOutputAmount)
         .txOutInlineDatumValue(updatedOracleDatum, "JSON")
 
       tx
@@ -922,11 +1010,25 @@ import {
      */
     getOracleData = async (): Promise<OracleData> => {
       const oracleNftPolicyId = resolveScriptHash(this.getOracleNFTCbor(), "V3");
-      const oracleUtxo = (
-        await this.getAddressUtxosWithToken(this.oracleAddress, oracleNftPolicyId)
-      )[0]!;
+      const utxos = await this.getAddressUtxosWithToken(this.oracleAddress, oracleNftPolicyId);
+      
+      if (!utxos || utxos.length === 0) {
+        throw new Error(
+          `Oracle UTxO not found at address ${this.oracleAddress} with policy ID ${oracleNftPolicyId}. ` +
+          `The oracle might not be initialized for this project.`
+        );
+      }
+      
+      const oracleUtxo = utxos[0];
+      if (!oracleUtxo || !oracleUtxo.output || !oracleUtxo.output.plutusData) {
+        throw new Error(
+          `Oracle UTxO found but missing required data at address ${this.oracleAddress}. ` +
+          `The oracle might be corrupted or not properly initialized.`
+        );
+      }
+      
       const oracleDatum: OracleDatum = parseDatumCbor(
-        oracleUtxo!.output.plutusData!,
+        oracleUtxo.output.plutusData,
       );
   
       const nftIndex = oracleDatum.fields[0].int;
