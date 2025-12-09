@@ -68,14 +68,6 @@ function resolveBlockfrostKey(networkId) {
   throw new Error('Set BLOCKFROST_PREPROD_API_KEY or BLOCKFROST_API_KEY for preprod operations.');
 }
 
-function requireEnv(name) {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Environment variable ${name} is required`);
-  }
-  return value;
-}
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -217,12 +209,10 @@ async function buildWalletAndContract({ requireParamUtxo, networkId, project, pa
   const networkName = networkId === 1 ? 'mainnet' : 'preprod';
   console.log(`[hf-cli] Using ${apiKeyLabel} for ${networkName}.`);
 
-  const collectionName = process.env.COLLECTION_NAME
-    || project?.collectionName
-    || project?.title;
+  const collectionName = project?.collectionName || project?.title;
 
   if (!collectionName) {
-    throw new Error('Set COLLECTION_NAME or provide a project with collectionName/title');
+    throw new Error('Project must have collectionName or title in projects.json');
   }
 
   const provider = new BlockfrostProvider(apiKey);
@@ -337,36 +327,37 @@ async function handleInit(networkId, shared) {
     ensureCollateralUtxo: true,
   });
 
-  // Load parameters from project JSON (preferred) or fallback to environment variables
+  // Load parameters from project JSON
   const project = shared.project;
   
   if (!project) {
     throw new Error('Project is required. Use --project-id=<projectId> or set project configuration in projects.json');
   }
 
-  const lovelacePrice = project.mintPriceLovelace 
-    ? Number(project.mintPriceLovelace)
-    : Number(requireEnv('FEE_PRICE_LOVELACE'));
+  if (project.mintPriceLovelace === undefined) {
+    throw new Error('mintPriceLovelace is required in projects.json');
+  }
+  const lovelacePrice = Number(project.mintPriceLovelace);
   
   // APY to APR: expectedApr = [numerator, denominator] = [apy, 100]
-  const expectedAprNumerator = project.apy !== undefined
-    ? Number(project.apy)
-    : Number(requireEnv('EXPECTED_APR_NUMERATOR'));
+  if (project.apy === undefined) {
+    throw new Error('apy is required in projects.json');
+  }
+  const expectedAprNumerator = Number(project.apy);
   const expectedAprDenominator = 100; // Always use 100 as denominator when using APY from project
   
-  // Calculate maturation time from lending period or use env value
-  let maturationTime;
-  if (project.lendingPeriod !== undefined) {
-    const currentTime = Date.now();
-    const lendingPeriodMs = Number(project.lendingPeriod) * 30 * 24 * 60 * 60 * 1000; // months to ms
-    maturationTime = BigInt(currentTime + lendingPeriodMs);
-  } else {
-    maturationTime = BigInt(requireEnv('MATURATION_TIME'));
+  // Calculate maturation time from lending period
+  if (project.lendingPeriod === undefined) {
+    throw new Error('lendingPeriod is required in projects.json');
   }
+  const currentTime = Date.now();
+  const lendingPeriodMs = Number(project.lendingPeriod) * 30 * 24 * 60 * 60 * 1000; // months to ms
+  const maturationTime = BigInt(currentTime + lendingPeriodMs);
   
-  const maxMints = project.maxMints !== undefined
-    ? BigInt(project.maxMints)
-    : BigInt(requireEnv('MAX_MINTS'));
+  if (project.maxMints === undefined) {
+    throw new Error('maxMints is required in projects.json');
+  }
+  const maxMints = BigInt(project.maxMints);
 
   console.log('Booting protocol with settings:', {
     lovelacePrice,
@@ -374,7 +365,7 @@ async function handleInit(networkId, shared) {
     expectedAprDenominator,
     maturationTime: maturationTime.toString(),
     maxMints: maxMints.toString(),
-    source: project ? 'project.json' : 'environment variables',
+    source: 'projects.json',
   });
 
   const { paramUtxo } = await bootProtocol(

@@ -156,14 +156,28 @@ export async function POST(req: NextRequest) {
 
     // Load metadata from project configuration
     const collectionName = project.collectionName ?? project.title;
-    const tokenName = `${collectionName} (${currentIndex})`;
+    const tokenName = `${collectionName} #${currentIndex}`;
     
-    // Use metadata from project configuration or default values
+    // Validate that metadata.image (IPFS URL) is set in projects.json
+    if (!project.metadata?.image) {
+      return NextResponse.json({
+        error: `Project ${project.id} must have metadata.image (IPFS URL) set in projects.json`
+      }, { status: 400 });
+    }
+
+    if (!project.metadata.image.startsWith('ipfs://')) {
+      return NextResponse.json({
+        error: `Project ${project.id} metadata.image must be an IPFS URL (ipfs://...)`
+      }, { status: 400 });
+    }
+    
+    // Use metadata from projects.json
     const tokenMetadata = {
-      name: project.metadata?.name || tokenName,
-      image: project.metadata?.image || 'ipfs://QmRzicpReutwCkM6aotuKjErFCUD213DpwPq6ByuzMJaua',
-      description: project.metadata?.description || tokenName,
-      ...project.metadata // Include any additional metadata fields
+      name: tokenName,
+      image: project.metadata.image,
+      description: project.metadata.description || project.description || tokenName,
+      ...(project.metadata.mediaType && { mediaType: project.metadata.mediaType }),
+      ...(project.metadata.attributes && { attributes: project.metadata.attributes }),
     };
 
     // Return data needed for client-side transaction building

@@ -55,16 +55,18 @@ export interface Project {
     unitCost: number;
   };
 
-  // NFT Metadata
+  // NFT Metadata (for minting)
   metadata?: {
     name?: string;
     image?: string;
     description?: string;
-    [key: string]: any;
+    mediaType?: string;
+    attributes?: Array<{
+      trait_type: string;
+      value: string | number;
+    }>;
+    [key: string]: unknown;
   };
-
-  // Optional path to metadata JSON file (alternative to MINT_METADATA_JSON_PATH)
-  metadataJsonPath?: string;
 }
 
 let cachedProjects: Project[] | null = null;

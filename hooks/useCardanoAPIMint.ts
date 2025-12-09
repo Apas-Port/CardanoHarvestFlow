@@ -178,13 +178,13 @@ export function useCardanoAPIMint() {
           { unit: 'lovelace', quantity: '2000000' },
         ]);
 
+        if (!tokenMetadata || !tokenMetadata.image) {
+          throw new Error('Token metadata is missing or invalid. Please ensure project metadata.image is set in projects.json');
+        }
+
         const metadata = {
           [policyId]: {
-            [tokenName]: tokenMetadata || {
-              name: tokenName,
-              image: 'ipfs://QmRzicpReutwCkM6aotuKjErFCUD213DpwPq6ByuzMJaua',
-              description: tokenName,
-            },
+            [tokenName]: tokenMetadata,
           },
         };
         tx.metadataValue('721', metadata);
@@ -486,6 +486,15 @@ export function useCardanoAPIMint() {
       // Build mint string for all NFTs
       const mintAssets: Array<{tokenNameHex: string, tokenName: string}> = [];
       
+      // Validate project metadata before bulk minting
+      if (!project.metadata?.image) {
+        throw new Error(`Project ${project.id} must have metadata.image (IPFS URL) set in projects.json`);
+      }
+
+      if (!project.metadata.image.startsWith('ipfs://')) {
+        throw new Error(`Project ${project.id} metadata.image must be an IPFS URL (ipfs://...)`);
+      }
+
       for (let i = 0; i < quantity; i++) {
         const tokenId = tokenIds[i];
         const tokenName = `${collectionName} (${tokenId})`;
@@ -493,14 +502,16 @@ export function useCardanoAPIMint() {
         
         mintAssets.push({tokenNameHex, tokenName});
 
-        // Add metadata for each NFT
+        // Add metadata for each NFT using project metadata
         if (!totalMetadata[policyId]) {
           totalMetadata[policyId] = {};
         }
         totalMetadata[policyId][tokenName] = {
           name: tokenName,
-          image: 'ipfs://QmRzicpReutwCkM6aotuKjErFCUD213DpwPq6ByuzMJaua',
-          description: tokenName,
+          image: project.metadata.image,
+          description: project.metadata.description || project.description || tokenName,
+          ...(project.metadata.mediaType && { mediaType: project.metadata.mediaType }),
+          ...(project.metadata.attributes && { attributes: project.metadata.attributes }),
         };
       }
       
