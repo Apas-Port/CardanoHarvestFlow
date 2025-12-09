@@ -171,10 +171,20 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
     
+    // Helper function to extract CID from IPFS URL for Cardano metadata (64 byte limit)
+    const extractIpfsCid = (ipfsUrl: string): string => {
+      if (!ipfsUrl) return ipfsUrl;
+      // Remove ipfs:// prefix to save bytes (CID only fits in 64 byte limit)
+      if (ipfsUrl.startsWith('ipfs://')) {
+        return ipfsUrl.replace('ipfs://', '');
+      }
+      return ipfsUrl;
+    };
+    
     // Use metadata from projects.json
     const tokenMetadata = {
       name: tokenName,
-      image: project.metadata.image,
+      image: extractIpfsCid(project.metadata.image), // Extract CID only (removes ipfs:// prefix)
       description: project.metadata.description || project.description || tokenName,
       ...(project.metadata.mediaType && { mediaType: project.metadata.mediaType }),
       ...(project.metadata.attributes && { attributes: project.metadata.attributes }),
@@ -259,10 +269,42 @@ export async function GET(req: NextRequest) {
     }
 
     const { getOracleSnapshot, boolDataToBoolean } = await loadHarvestflowContract();
-    const snapshot = await getOracleSnapshot(project.id, req);
+    let snapshot;
+    try {
+      snapshot = await getOracleSnapshot(project.id, req);
+    } catch (snapshotError) {
+      console.error('[api/cardano/mint] Error getting oracle snapshot:', snapshotError);
+      const errorMessage = snapshotError instanceof Error ? snapshotError.message : String(snapshotError);
+      
+      // Check if it's an oracle UTxO not found error
+      if (errorMessage.includes('Cannot read properties of undefined') || 
+          errorMessage.includes('oracleUtxo') ||
+          errorMessage.includes('getAddressUtxosWithToken')) {
+        return NextResponse.json({
+          error: 'Oracle UTxO not found. The oracle might not be initialized for this project.',
+          details: {
+            projectId: project.id,
+            error: errorMessage,
+          }
+        }, { status: 500 });
+      }
+      
+      return NextResponse.json({
+        error: `Failed to get oracle snapshot: ${errorMessage}`,
+        details: {
+          projectId: project.id,
+        }
+      }, { status: 500 });
+    }
+    
     const currentIndex = Number(snapshot.oracle.nftIndex ?? 0);
     const maxMints = Number((snapshot.oracle.maxMints && 'int' in snapshot.oracle.maxMints) ? snapshot.oracle.maxMints.int : snapshot.oracle.maxMints ?? 0);
     const lovelacePrice = Number(snapshot.oracle.lovelacePrice ?? 0);
+
+    // Debug: Log the actual structure of nftMintAllowed
+    console.log('[api/cardano/mint] GET - nftMintAllowed structure:', JSON.stringify(snapshot.oracle.nftMintAllowed, null, 2));
+    console.log('[api/cardano/mint] GET - nftMintAllowed type:', typeof snapshot.oracle.nftMintAllowed);
+    console.log('[api/cardano/mint] GET - boolDataToBoolean result:', boolDataToBoolean(snapshot.oracle.nftMintAllowed));
 
     return NextResponse.json({
       projectId: project.id,
@@ -276,6 +318,12 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('[api/cardano/mint] Status query error:', error);
-    return NextResponse.json({ error: 'Failed to get minting status' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ 
+      error: 'Failed to get minting status',
+      details: {
+        error: errorMessage,
+      }
+    }, { status: 500 });
   }
 }

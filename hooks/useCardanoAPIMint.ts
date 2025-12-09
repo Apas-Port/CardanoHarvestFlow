@@ -182,9 +182,22 @@ export function useCardanoAPIMint() {
           throw new Error('Token metadata is missing or invalid. Please ensure project metadata.image is set in projects.json');
         }
 
+        // Helper function to extract CID from IPFS URL for Cardano metadata (64 byte limit)
+        const extractIpfsCid = (ipfsUrl: string): string => {
+          if (!ipfsUrl) return ipfsUrl;
+          // Remove ipfs:// prefix to save bytes (CID only fits in 64 byte limit)
+          if (ipfsUrl.startsWith('ipfs://')) {
+            return ipfsUrl.replace('ipfs://', '');
+          }
+          return ipfsUrl;
+        };
+
         const metadata = {
           [policyId]: {
-            [tokenName]: tokenMetadata,
+            [tokenName]: {
+              ...tokenMetadata,
+              image: extractIpfsCid(tokenMetadata.image), // Extract CID only (removes ipfs:// prefix)
+            },
           },
         };
         tx.metadataValue('721', metadata);
@@ -495,6 +508,16 @@ export function useCardanoAPIMint() {
         throw new Error(`Project ${project.id} metadata.image must be an IPFS URL (ipfs://...)`);
       }
 
+      // Helper function to extract CID from IPFS URL for Cardano metadata (64 byte limit)
+      const extractIpfsCid = (ipfsUrl: string): string => {
+        if (!ipfsUrl) return ipfsUrl;
+        // Remove ipfs:// prefix to save bytes (CID only fits in 64 byte limit)
+        if (ipfsUrl.startsWith('ipfs://')) {
+          return ipfsUrl.replace('ipfs://', '');
+        }
+        return ipfsUrl;
+      };
+
       for (let i = 0; i < quantity; i++) {
         const tokenId = tokenIds[i];
         const tokenName = `${collectionName} (${tokenId})`;
@@ -508,7 +531,7 @@ export function useCardanoAPIMint() {
         }
         totalMetadata[policyId][tokenName] = {
           name: tokenName,
-          image: project.metadata.image,
+          image: extractIpfsCid(project.metadata.image), // Extract CID only (removes ipfs:// prefix)
           description: project.metadata.description || project.description || tokenName,
           ...(project.metadata.mediaType && { mediaType: project.metadata.mediaType }),
           ...(project.metadata.attributes && { attributes: project.metadata.attributes }),

@@ -129,13 +129,37 @@ export function resolveNumericValue(value: unknown, fallback = 0): number {
 }
 
 export function boolDataToBoolean(value: any): boolean {
-  if (!value || typeof value !== 'object') return false;
+  // Handle boolean directly
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  
+  // Handle null/undefined
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  
+  // Check for .bool property (Mesh SDK format) - this is the primary format used by Mesh SDK
+  // This matches the logic in toggle-minting.ts: (oracleData.nftMintAllowed as any).bool === true
+  if ('bool' in value) {
+    if (typeof value.bool === 'boolean') {
+      return value.bool === true;
+    }
+    // If .bool exists but is not a boolean, check if it's truthy
+    return !!value.bool;
+  }
+  
+  // Fallback: Check for constructor property (Plutus format: True = constructor 1, False = constructor 0)
   if ('constructor' in value) {
     return value.constructor === 1;
   }
+  
+  // Fallback: Check for alternative property (alternative format: True = alternative 1, False = alternative 0)
   if ('alternative' in value) {
     return value.alternative === 1;
   }
+  
+  // Default to false if we can't determine the value (matches toggle-minting.ts behavior)
   return false;
 }
 
