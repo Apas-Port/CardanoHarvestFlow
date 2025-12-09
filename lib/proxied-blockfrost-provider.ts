@@ -167,7 +167,7 @@ export class ProxiedBlockfrostProvider extends BlockfrostProvider {
     }
 
     const data = await response.json();
-    console.log('[ProxiedBlockfrostProvider] evaluateTx raw response:', JSON.stringify(data).substring(0, 1000));
+    console.log('[ProxiedBlockfrostProvider] evaluateTx raw response:', JSON.stringify(data, null, 2));
 
     // Handle Ogmios format response
     if (data && typeof data === 'object' && 'result' in data) {
@@ -176,17 +176,56 @@ export class ProxiedBlockfrostProvider extends BlockfrostProvider {
       // Check for EvaluationFailure
       if (result.EvaluationFailure) {
         const failures = result.EvaluationFailure;
-        console.error('[ProxiedBlockfrostProvider] Script evaluation failed:', JSON.stringify(failures, null, 2));
-
-        // Extract script failure details
+        
+        // 詳細なエラーログを出力
+        console.error('========== EVALUATION FAILURE DETAILS ==========');
+        console.error('[ProxiedBlockfrostProvider] Full failure object:', JSON.stringify(failures, null, 2));
+        
+        // ScriptFailuresの詳細を抽出
         if (failures.ScriptFailures && Object.keys(failures.ScriptFailures).length > 0) {
-          const failureDetails = Object.entries(failures.ScriptFailures)
-            .map(([key, value]: [string, any]) => `${key}: ${JSON.stringify(value)}`)
-            .join(', ');
-          throw new Error(`Script evaluation failed: ${failureDetails}`);
-        } else {
-          throw new Error('Script evaluation failed with no specific error details. This may indicate a script logic error or missing required data.');
+          const scriptFailures = failures.ScriptFailures;
+          console.error('[ProxiedBlockfrostProvider] Script failures found:', Object.keys(scriptFailures).length);
+          
+          // 各スクリプトの失敗詳細を出力
+          Object.entries(scriptFailures).forEach(([key, value]: [string, any]) => {
+            console.error(`[ProxiedBlockfrostProvider] Script failure [${key}]:`, JSON.stringify(value, null, 2));
+            
+            // エラーメッセージを抽出（可能な場合）
+            if (value && typeof value === 'object') {
+              if ('message' in value) {
+                console.error(`[ProxiedBlockfrostProvider] Error message: ${value.message}`);
+              }
+              if ('error' in value) {
+                console.error(`[ProxiedBlockfrostProvider] Error: ${JSON.stringify(value.error, null, 2)}`);
+              }
+              if ('cause' in value) {
+                console.error(`[ProxiedBlockfrostProvider] Cause: ${JSON.stringify(value.cause, null, 2)}`);
+              }
+            }
+          });
+          
+          // 読みやすいエラーメッセージを構築
+          const failureDetails = Object.entries(scriptFailures)
+            .map(([key, value]: [string, any]) => {
+              const scriptType = key.includes('spend') ? 'Oracle Script' : 
+                                key.includes('mint') ? 'NFT Mint Script' : 
+                                'Unknown Script';
+              const errorMsg = value?.message || value?.error || JSON.stringify(value);
+              return `${scriptType} (${key}): ${errorMsg}`;
+            })
+            .join('\n');
+          
+          console.error('==============================================');
+          throw new Error(`Script evaluation failed:\n${failureDetails}`);
+        } 
+        
+        // Other failure types
+        if (failures.OtherFailures) {
+          console.error('[ProxiedBlockfrostProvider] Other failures:', JSON.stringify(failures.OtherFailures, null, 2));
         }
+        
+        console.error('==============================================');
+        throw new Error('Script evaluation failed with no specific error details. This may indicate a script logic error or missing required data.');
       }
 
       // Check for EvaluationResult (success case)
@@ -218,8 +257,22 @@ export class ProxiedBlockfrostProvider extends BlockfrostProvider {
       }
     }
 
+    // Format 2: Direct Blockfrost format
+    if (data && typeof data === 'object' && 'EvaluationFailure' in data) {
+      const failures = data.EvaluationFailure;
+      console.error('[ProxiedBlockfrostProvider] Direct format EvaluationFailure:', JSON.stringify(failures, null, 2));
+      
+      if (failures.ScriptFailures) {
+        const failureDetails = Object.entries(failures.ScriptFailures)
+          .map(([key, value]: [string, any]) => `${key}: ${JSON.stringify(value)}`)
+          .join('\n');
+        throw new Error(`Script evaluation failed:\n${failureDetails}`);
+      }
+      throw new Error('Script evaluation failed');
+    }
+
     // Fallback: return data as-is
-    console.warn('[ProxiedBlockfrostProvider] Unexpected evaluation response format, returning as-is');
+    console.warn('[ProxiedBlockfrostProvider] Unexpected evaluation response format:', JSON.stringify(data, null, 2));
     return data;
   }
 

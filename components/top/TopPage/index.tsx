@@ -66,40 +66,12 @@ export const TopPage = ({ lng, onLoaded }: { lng: string; onLoaded?: () => void 
     console.log('execLendSupport called', params);
     
     try {
-      // IMPORTANT: Bulk minting in single tx not supported due to oracle validator limitation
-      // Always use sequential minting
-      console.log(`Minting ${params.quantity} NFT(s) sequentially...`);
-      
       let result;
+      
       if (params.quantity > 1) {
-        // Sequential minting for multiple NFTs
-        const allTokenIds: number[] = [];
-        let lastTxHash = '';
-        let totalLovelace = 0;
-        
-        for (let i = 0; i < params.quantity; i++) {
-          console.log(`Minting NFT ${i + 1} of ${params.quantity}...`);
-          const singleResult = await apiMint(params.project, 1);
-          
-          if (singleResult && singleResult.txHash) {
-            lastTxHash = singleResult.txHash;
-            allTokenIds.push(...(singleResult.tokenIds || []));
-            totalLovelace += singleResult.mintLovelace || 0;
-            
-            // Wait 3 seconds between mints to ensure oracle is updated
-            if (i < params.quantity - 1) {
-              console.log('Waiting 3 seconds before next mint...');
-              await new Promise(resolve => setTimeout(resolve, 3000));
-            }
-          }
-        }
-        
-        result = {
-          txHash: lastTxHash,
-          tokenIds: allTokenIds,
-          policyId: '',
-          mintLovelace: totalLovelace,
-        };
+        // Bulk minting in single transaction
+        console.log(`Bulk minting ${params.quantity} NFT(s) in a single transaction...`);
+        result = await apiMintBulk(params.project, params.quantity);
       } else {
         // Single mint
         result = await apiMint(params.project, 1);

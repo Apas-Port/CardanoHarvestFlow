@@ -112,5 +112,62 @@
         }
       ]
     }
+  },
+  {
+    "id": "003",
+    "num": 3,
+    "title": "Cardano Dev 3",
+    "subTitle": "BulkMint Test",
+    "description": "BulkMint Test NFT",
+    "apy": 8,
+    "lendingType": "ADA",
+    "network": "Cardano",
+    "capacity": 100,
+    "unitPrice": 1.9,
+    "collectionName": "Harvestflow_Dev_3_bulk",
+    "mainImage": "/images/project/1/main.png",
+    "previewImage": "/images/project/1/preview.jpg",
+    "tuktukImage": "/images/project/1/tuktuk.png",
+    "policyId": "5f0238678eaebedbacf0e3264dd3a4489274031855c45236c0c12c48",
+    "legacyPolicyIds": [],
+    "status": "active",
+    "interestEarned": "base number",
+    "interestRate": 8,
+    "repaymentMethod": "AT MATURITY",
+    "lendingPeriod": 3,
+    "assetId": [
+      "79",
+      "80",
+      "81"
+    ],
+    "startDate": "1 Oct 2025",
+    "listing": true,
+    "maxMints": 100,
+    "paramUtxoEnvKey": "PARAM_UTXO_DEV_003",
+    "mintPriceLovelace": 1900000,
+    "metadata": {
+      "name": "Harvestflow_Dev_3_bulk",
+      "image": "ipfs://bafybeiejwfhilsk3uwcjiyqbujpq4ykmuju54tomwxczdmg4ttghhl2jia",
+      "description": "BulkMint Test NFT",
+      "mediaType": "image/png",
+      "attributes": [
+        {
+          "trait_type": "Collection",
+          "value": "Harvestflow_Dev_3_bulk"
+        },
+        {
+          "trait_type": "Project",
+          "value": "BulkMint Test"
+        },
+        {
+          "trait_type": "APY",
+          "value": "8%"
+        },
+        {
+          "trait_type": "Lending Period",
+          "value": "3 months"
+        }
+      ]
+    }
   }
 ]

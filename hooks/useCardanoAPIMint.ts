@@ -472,6 +472,10 @@ export function useCardanoAPIMint() {
       });
 
       // Spend oracle UTxO
+      console.log('[useCardanoAPIMint] Building bulk mint with quantity:', quantity, 'type:', typeof quantity);
+      if (quantity === undefined || quantity === null) {
+        throw new Error(`Quantity is undefined or null. Expected a number, got: ${quantity}`);
+      }
       tx.spendingPlutusScriptV3()
         .txIn(
           oracleData.oracleUtxo.input.txHash,
@@ -479,7 +483,7 @@ export function useCardanoAPIMint() {
           oracleData.oracleUtxo.output.amount,
           oracleData.oracleUtxo.output.address,
         )
-        .txInRedeemerValue(mOracleRedeemer("MintPlutusNFT"))
+        .txInRedeemerValue(mOracleRedeemer("BulkMintPlutusNFT", quantity))
         .txInScript(scripts.oracleCbor)
         .txInInlineDatumPresent()
         .txOut(scripts.oracleAddress, [
@@ -584,8 +588,59 @@ export function useCardanoAPIMint() {
       );
       
       console.log('[useCardanoAPIMint] Completing bulk mint transaction...');
-      const unsignedTx = await tx.complete();
-      console.log('[useCardanoAPIMint] Bulk transaction completed successfully');
+      let unsignedTx: string;
+      try {
+        unsignedTx = await tx.complete();
+        console.log('[useCardanoAPIMint] Bulk transaction completed successfully');
+      } catch (completeError: any) {
+        console.error('========== TRANSACTION COMPLETION ERROR ==========');
+        console.error('[useCardanoAPIMint] Error type:', typeof completeError);
+        console.error('[useCardanoAPIMint] Error:', completeError);
+        
+        // Evaluation errorの詳細を抽出
+        if (completeError instanceof Error) {
+          console.error('[useCardanoAPIMint] Error message:', completeError.message);
+          console.error('[useCardanoAPIMint] Error stack:', completeError.stack);
+          
+          // Evaluation Failureのメッセージを確認
+          if (completeError.message.includes('evaluation') || 
+              completeError.message.includes('Script') ||
+              completeError.message.includes('EvaluationFailure')) {
+            console.error('[useCardanoAPIMint] This appears to be an evaluation failure');
+            console.error('[useCardanoAPIMint] Full error details:', {
+              message: completeError.message,
+              name: completeError.name,
+              stack: completeError.stack,
+              ...(completeError as any)
+            });
+          }
+        }
+        
+        // エラーオブジェクトの全プロパティをログ
+        if (completeError && typeof completeError === 'object') {
+          console.error('[useCardanoAPIMint] Error properties:', Object.keys(completeError));
+          console.error('[useCardanoAPIMint] Full error object:', JSON.stringify(completeError, null, 2));
+        }
+        
+        console.error('==================================================');
+        
+        // ユーザーフレンドリーなエラーメッセージを構築
+        let errorMessage = 'Failed to build bulk mint transaction';
+        if (completeError instanceof Error) {
+          if (completeError.message.includes('evaluation') || 
+              completeError.message.includes('Script')) {
+            errorMessage = `Transaction validation failed: ${completeError.message}`;
+          } else {
+            errorMessage = completeError.message;
+          }
+        }
+        
+        setMintStatus({
+          status: 'error',
+          error: errorMessage
+        });
+        throw completeError;
+      }
       
       // Sign and submit
       setMintStatus({ status: 'signing' });
