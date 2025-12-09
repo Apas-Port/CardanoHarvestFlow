@@ -112,6 +112,17 @@ export function getServerNetworkConfig(source?: Request | URL | string): ServerN
   const explicitNetwork = normalizeNetwork(process.env.NEXT_PUBLIC_CARDANO_NETWORK);
   const shouldForceMainnet = process.env.VERCEL_ENV === 'production' || process.env.VERCEL === '1';
 
+  // Check for ?network URL parameter (highest priority)
+  let networkParam: SupportedNetwork | null = null;
+  const url = extractUrlFromSource(source);
+  if (url) {
+    const networkValue = url.searchParams.get('network');
+    networkParam = normalizeNetwork(networkValue);
+    if (networkParam) {
+      console.log(`[network-config] ?network=${networkValue} parameter detected, using ${networkParam} network`);
+    }
+  }
+
   // Check for ?dev URL parameter (client-side only)
   let isDevMode = false;
 
@@ -120,21 +131,21 @@ export function getServerNetworkConfig(source?: Request | URL | string): ServerN
     isDevMode = searchParams.has('dev');
   }
 
-  if (!isDevMode) {
+  if (!isDevMode && url) {
     // Server-side: inspect request URL when available
-    const url = extractUrlFromSource(source);
-    if (url) {
-      isDevMode = url.searchParams.has('dev');
-    }
+    isDevMode = url.searchParams.has('dev');
   }
 
-  if (isDevMode) {
+  if (isDevMode && !networkParam) {
     console.log('[network-config] ?dev parameter detected, forcing preprod network');
   }
 
-  const network: SupportedNetwork = isDevMode
-    ? 'preprod'
-    : (explicitNetwork ?? (shouldForceMainnet ? 'mainnet' : 'preprod'));
+  // Priority: ?network param > ?dev param > env var > Vercel detection > default
+  const network: SupportedNetwork = networkParam
+    ? networkParam
+    : (isDevMode
+      ? 'preprod'
+      : (explicitNetwork ?? (shouldForceMainnet ? 'mainnet' : 'preprod')));
   const isMainnet = network === 'mainnet';
 
   return {

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 import { fetchMintedCountKoios } from '@/lib/fetch-minted-count-koios';
 import { getNetworkConfig } from '@/lib/network-config';
@@ -18,16 +20,23 @@ function resolveProjectsPath(isMainnet: boolean): string {
 
 async function loadProjects(request: NextRequest, resourcePath: string): Promise<ProjectEntry[]> {
   try {
-    const dataUrl = new URL(resourcePath, request.url);
-    const response = await fetch(dataUrl, { cache: 'no-store' });
-    if (!response.ok) {
-      console.error('[minted-count] Failed to fetch project data:', dataUrl, response.status, response.statusText);
-      return [];
-    }
-    const projects = await response.json();
+    // Load file directly from filesystem on server-side to avoid 401 errors on Vercel
+    // Determine filename from resourcePath (/data/projects.json or /data/dev-projects.json)
+    const isMainnet = resourcePath.includes('projects.json') && !resourcePath.includes('dev-projects.json');
+    const fileName = isMainnet ? 'projects.json' : 'dev-projects.json';
+    
+    // Build file path (process.cwd() points to project root)
+    const filePath = join(process.cwd(), 'public', 'data', fileName);
+    
+    // Read file synchronously
+    const fileContents = readFileSync(filePath, 'utf-8');
+    const projects = JSON.parse(fileContents);
+    
+    // Validate and return array
     return Array.isArray(projects) ? (projects as ProjectEntry[]) : [];
   } catch (error) {
-    console.error('[minted-count] Unexpected error while fetching project data:', error);
+    console.error('[minted-count] Unexpected error while loading project data:', error);
+    // Return empty array on error to allow processing to continue
     return [];
   }
 }
