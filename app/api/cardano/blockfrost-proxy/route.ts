@@ -85,7 +85,21 @@ export async function POST(req: NextRequest) {
 
     // For evaluate endpoint, log the structure
     if (endpoint.includes('/txs/evaluate')) {
-      console.log('[blockfrost-proxy] Evaluate response structure:', JSON.stringify(data, null, 2).substring(0, 500));
+      console.log('[blockfrost-proxy] Evaluate response structure:', JSON.stringify(data, null, 2));
+      
+      // Evaluation Failureの場合は詳細をログ
+      if (data && typeof data === 'object') {
+        if ('result' in data && data.result?.EvaluationFailure) {
+          console.error('[blockfrost-proxy] ========== EVALUATION FAILURE ==========');
+          console.error('[blockfrost-proxy] Full failure:', JSON.stringify(data.result.EvaluationFailure, null, 2));
+          console.error('[blockfrost-proxy] ========================================');
+        }
+        if ('EvaluationFailure' in data) {
+          console.error('[blockfrost-proxy] ========== EVALUATION FAILURE (direct) ==========');
+          console.error('[blockfrost-proxy] Full failure:', JSON.stringify(data.EvaluationFailure, null, 2));
+          console.error('[blockfrost-proxy] =================================================');
+        }
+      }
     }
 
     // Return data as-is for JSON responses, or wrap strings

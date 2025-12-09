@@ -1,4 +1,4 @@
-import { ConStr0, Integer, PubKeyAddress, Bool, mConStr0, mPubKeyAddress, mBool, conStr0, UTxO, integer, pubKeyAddress, bool, mConStr2, mConStr1, ConStr, mConStr, conStr, MConStr} from "@meshsdk/common";
+import { ConStr0, Integer, PubKeyAddress, Bool, mConStr0, mPubKeyAddress, mBool, conStr0, UTxO, integer, pubKeyAddress, bool, mConStr2, mConStr1, ConStr, mConStr, conStr, MConStr, Data} from "@meshsdk/common";
 
 export type OracleDatum = ConStr0<[Integer, Integer, PubKeyAddress, Bool, Bool, Integer, Integer, Integer, Integer]>;
 
@@ -32,33 +32,56 @@ export type ParamUtxo = {
 
 export type OracleRedeemerData =
       "MintPlutusNFT"
+    | "BulkMintPlutusNFT"
     | "StopOracle"
     | "EnableNFTMinting"
     | "DisableNFTMinting"
     | "EnableNFTTrading"
     | "DisableNFTTrading"
 
-export type OracleRedeemer = ConStr0<never[]> | ConStr<3, never[]> | ConStr<4, never[]> | ConStr<5, never[]>;
-export type MOracleRedeemer = MConStr<0, never[]> | MConStr<1, never[]> | MConStr<2, never[]> | MConStr<3, never[]> | MConStr<4, never[]> | MConStr<5, never[]>;
-export function oracleRedeemer(redeemer: OracleRedeemerData): OracleRedeemer {
+export type OracleRedeemer = ConStr0<never[]> | ConStr<1, number[]> | ConStr<2, never[]> | ConStr<3, never[]> | ConStr<4, never[]> | ConStr<5, never[]> | ConStr<6, never[]>;
+export type MOracleRedeemer = MConStr<0, never[]> | MConStr<1, Data[]> | MConStr<2, never[]> | MConStr<3, never[]> | MConStr<4, never[]> | MConStr<5, never[]> | MConStr<6, never[]>;
+export function oracleRedeemer(redeemer: OracleRedeemerData, quantity?: number): OracleRedeemer {
     switch (redeemer) {
         case "MintPlutusNFT": return conStr0([]);
-        case "StopOracle": return conStr0([]);
-        case "EnableNFTMinting": return conStr0([]);
-        case "DisableNFTMinting": return conStr(3, []);
-        case "EnableNFTTrading": return conStr(4, []);
-        case "DisableNFTTrading": return conStr(5, []);
+        case "BulkMintPlutusNFT": 
+            if (quantity === undefined || quantity === null) {
+                throw new Error("BulkMintPlutusNFT requires quantity parameter");
+            }
+            // quantityが数値であることを確認
+            const quantityNumForConStr = Number(quantity);
+            if (!Number.isFinite(quantityNumForConStr) || quantityNumForConStr <= 0) {
+                throw new Error(`BulkMintPlutusNFT requires a positive number for quantity, got: ${quantity} (type: ${typeof quantity})`);
+            }
+            // mRBulkMintと同じ方法で直接数値を渡す
+            return conStr(1, [quantityNumForConStr]);
+        case "StopOracle": return conStr(2, []);
+        case "EnableNFTMinting": return conStr(3, []);
+        case "DisableNFTMinting": return conStr(4, []);
+        case "EnableNFTTrading": return conStr(5, []);
+        case "DisableNFTTrading": return conStr(6, []);
     }
 }
 
-export function mOracleRedeemer(redeemer: OracleRedeemerData): MOracleRedeemer {
+export function mOracleRedeemer(redeemer: OracleRedeemerData, quantity?: number): MOracleRedeemer {
     switch (redeemer) {
         case "MintPlutusNFT": return mConStr0([]);
-        case "StopOracle": return mConStr1([]);
-        case "EnableNFTMinting": return mConStr2([]);
-        case "DisableNFTMinting": return mConStr(3, []);
-        case "EnableNFTTrading": return mConStr(4, []);
-        case "DisableNFTTrading": return mConStr(5, []);
+        case "BulkMintPlutusNFT": 
+            if (quantity === undefined || quantity === null) {
+                throw new Error("BulkMintPlutusNFT requires quantity parameter");
+            }
+            // quantityが数値であることを確認
+            const quantityNum = Number(quantity);
+            if (!Number.isFinite(quantityNum) || quantityNum <= 0) {
+                throw new Error(`BulkMintPlutusNFT requires a positive number for quantity, got: ${quantity} (type: ${typeof quantity})`);
+            }
+            // mRBulkMintと同じ方法で直接数値を渡す
+            return mConStr(1, [quantityNum]);
+        case "StopOracle": return mConStr(2, []);
+        case "EnableNFTMinting": return mConStr(3, []);
+        case "DisableNFTMinting": return mConStr(4, []);
+        case "EnableNFTTrading": return mConStr(5, []);
+        case "DisableNFTTrading": return mConStr(6, []);
     }
 }
 

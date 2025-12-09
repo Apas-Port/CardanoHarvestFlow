@@ -389,10 +389,10 @@ export function useCardanoAPIMint() {
       throw new Error('Wallet not connected');
     }
 
-    if (quantity <= 0 || quantity > 50) {
+    if (quantity <= 0 || quantity > 15) {
       setMintStatus({
         status: 'error',
-        error: 'Quantity must be between 1 and 50'
+        error: 'Quantity must be between 1 and 15'
       });
       throw new Error('Invalid quantity');
     }
@@ -472,6 +472,10 @@ export function useCardanoAPIMint() {
       });
 
       // Spend oracle UTxO
+      console.log('[useCardanoAPIMint] Building bulk mint with quantity:', quantity, 'type:', typeof quantity);
+      if (quantity === undefined || quantity === null) {
+        throw new Error(`Quantity is undefined or null. Expected a number, got: ${quantity}`);
+      }
       tx.spendingPlutusScriptV3()
         .txIn(
           oracleData.oracleUtxo.input.txHash,
@@ -479,7 +483,7 @@ export function useCardanoAPIMint() {
           oracleData.oracleUtxo.output.amount,
           oracleData.oracleUtxo.output.address,
         )
-        .txInRedeemerValue(mOracleRedeemer("MintPlutusNFT"))
+        .txInRedeemerValue(mOracleRedeemer("BulkMintPlutusNFT", quantity))
         .txInScript(scripts.oracleCbor)
         .txInInlineDatumPresent()
         .txOut(scripts.oracleAddress, [
@@ -564,8 +568,18 @@ export function useCardanoAPIMint() {
       tx.metadataValue('721', totalMetadata);
       
       // Send all NFTs to recipient
+      // Cardanoでは、各NFTに対して最小Lovelace量が必要
+      // 基本: 1,000,000 lovelace (1 ADA)
+      // 各NFT追加: 約150,000 lovelace (0.15 ADA) - 安全のため多めに設定
+      // エラーメッセージから、15個のNFTには約3,025,620 lovelaceが必要
+      const baseLovelace = 1_000_000; // 基本1 ADA
+      const nftLovelacePerToken = 150_000; // 各NFTあたり（安全のため多め）
+      const minLovelaceForOutput = baseLovelace + (mintAssets.length * nftLovelacePerToken);
+      
+      console.log(`[useCardanoAPIMint] Calculating lovelace for ${mintAssets.length} NFTs: ${minLovelaceForOutput} lovelace`);
+      
       let nftOutputs: Array<{ unit: string; quantity: string }> = [
-        { unit: 'lovelace', quantity: '2000000' }
+        { unit: 'lovelace', quantity: minLovelaceForOutput.toString() }
       ];
       for (const asset of mintAssets) {
         const mintedAssetUnit = `${policyId}${asset.tokenNameHex}`;
@@ -584,8 +598,59 @@ export function useCardanoAPIMint() {
       );
       
       console.log('[useCardanoAPIMint] Completing bulk mint transaction...');
-      const unsignedTx = await tx.complete();
-      console.log('[useCardanoAPIMint] Bulk transaction completed successfully');
+      let unsignedTx: string;
+      try {
+        unsignedTx = await tx.complete();
+        console.log('[useCardanoAPIMint] Bulk transaction completed successfully');
+      } catch (completeError: any) {
+        console.error('========== TRANSACTION COMPLETION ERROR ==========');
+        console.error('[useCardanoAPIMint] Error type:', typeof completeError);
+        console.error('[useCardanoAPIMint] Error:', completeError);
+        
+        // Evaluation errorの詳細を抽出
+        if (completeError instanceof Error) {
+          console.error('[useCardanoAPIMint] Error message:', completeError.message);
+          console.error('[useCardanoAPIMint] Error stack:', completeError.stack);
+          
+          // Evaluation Failureのメッセージを確認
+          if (completeError.message.includes('evaluation') || 
+              completeError.message.includes('Script') ||
+              completeError.message.includes('EvaluationFailure')) {
+            console.error('[useCardanoAPIMint] This appears to be an evaluation failure');
+            console.error('[useCardanoAPIMint] Full error details:', {
+              message: completeError.message,
+              name: completeError.name,
+              stack: completeError.stack,
+              ...(completeError as any)
+            });
+          }
+        }
+        
+        // エラーオブジェクトの全プロパティをログ
+        if (completeError && typeof completeError === 'object') {
+          console.error('[useCardanoAPIMint] Error properties:', Object.keys(completeError));
+          console.error('[useCardanoAPIMint] Full error object:', JSON.stringify(completeError, null, 2));
+        }
+        
+        console.error('==================================================');
+        
+        // ユーザーフレンドリーなエラーメッセージを構築
+        let errorMessage = 'Failed to build bulk mint transaction';
+        if (completeError instanceof Error) {
+          if (completeError.message.includes('evaluation') || 
+              completeError.message.includes('Script')) {
+            errorMessage = `Transaction validation failed: ${completeError.message}`;
+          } else {
+            errorMessage = completeError.message;
+          }
+        }
+        
+        setMintStatus({
+          status: 'error',
+          error: errorMessage
+        });
+        throw completeError;
+      }
       
       // Sign and submit
       setMintStatus({ status: 'signing' });
@@ -605,7 +670,80 @@ export function useCardanoAPIMint() {
       };
       
     } catch (error) {
+      console.error('========== BULK MINTING ERROR ==========');
       console.error('Bulk minting error:', error);
+      
+      // エラーの詳細を抽出
+      if (error && typeof error === 'object') {
+        console.error('Error type:', error.constructor?.name);
+        console.error('Error properties:', Object.keys(error));
+        
+        // TxSendErrorの詳細を確認
+        if ('info' in error) {
+          console.error('Error info:', error.info);
+          try {
+            const infoStr = String(error.info);
+            console.error('Error info (string):', infoStr);
+            
+            if (infoStr.includes('BAD_REQUEST')) {
+              // BAD_REQUESTメッセージを抽出
+              const badRequestMatch = infoStr.match(/BAD_REQUEST\s*\(([^)]+)\)/);
+              if (badRequestMatch) {
+                console.error('BAD_REQUEST content:', badRequestMatch[1]);
+                try {
+                  const badRequestJson = JSON.parse(badRequestMatch[1]);
+                  console.error('BAD_REQUEST parsed:', JSON.stringify(badRequestJson, null, 2));
+                  
+                  if (badRequestJson.message) {
+                    console.error('Error message from BAD_REQUEST:', badRequestJson.message);
+                    try {
+                      const messageJson = JSON.parse(badRequestJson.message);
+                      console.error('Parsed message JSON:', JSON.stringify(messageJson, null, 2));
+                    } catch (e) {
+                      console.error('Message is not JSON:', badRequestJson.message);
+                    }
+                  }
+                } catch (e) {
+                  console.error('Could not parse BAD_REQUEST as JSON:', e);
+                }
+              }
+              
+              // メッセージフィールドを直接抽出
+              const messageMatch = infoStr.match(/message":"([^"]+)"/);
+              if (messageMatch) {
+                const message = messageMatch[1];
+                console.error('Extracted message:', message);
+                try {
+                  const parsed = JSON.parse(message);
+                  console.error('Parsed message JSON:', JSON.stringify(parsed, null, 2));
+                } catch (e) {
+                  console.error('Could not parse message as JSON:', message);
+                }
+              }
+            }
+            
+            if (infoStr.includes('TxSubmitFail')) {
+              console.error('TxSubmitFail detected - this usually means transaction size exceeds limit');
+            }
+          } catch (e) {
+            console.error('Error parsing info:', e);
+          }
+        }
+        
+        if ('code' in error) {
+          console.error('Error code:', error.code);
+        }
+        
+        if ('message' in error) {
+          console.error('Error message:', error.message);
+        }
+        
+        if ('stack' in error) {
+          console.error('Error stack:', error.stack);
+        }
+      }
+      
+      console.error('========================================');
       setMintStatus({ status: 'idle' });
       throw error;
     }

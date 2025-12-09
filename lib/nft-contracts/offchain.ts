@@ -754,7 +754,7 @@ import {
           oracleUtxo.output.amount,
           oracleUtxo.output.address,
         )
-        .txInRedeemerValue(mConStr0([]))
+        .txInRedeemerValue(mOracleRedeemer("BulkMintPlutusNFT", quantity))
         .txInScript(this.getOracleCbor())
         .txInInlineDatumPresent()
         .txOut(this.oracleAddress, [{ unit: oracleNftPolicyId, quantity: "1" }])

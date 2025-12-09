@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import type { MintMetadataInput } from '@/lib/harvestflow-contract';
+import { boolDataToBoolean } from '@/lib/harvestflow-contract';
 import { getProjectById, matchNFTPolicyIdWithProjects, Project } from '@/lib/project';
 import { getServerNetworkConfig } from '@/lib/network-config';
 
@@ -52,8 +53,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
     }
 
-    if (!quantity || quantity < 1 || quantity > 50) {
-      return NextResponse.json({ error: 'quantity must be between 1 and 50' }, { status: 400 });
+    if (!quantity || quantity < 1 || quantity > 15) {
+      return NextResponse.json({ error: 'quantity must be between 1 and 15' }, { status: 400 });
     }
 
     // Load contract WITHOUT server wallet (requireWallet: false)
@@ -123,15 +124,8 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check if minting is allowed
-    // Handle different formats of Bool type from MeshJS
-    let mintingAllowed = false;
-    if (typeof oracleData.nftMintAllowed === 'boolean') {
-      mintingAllowed = oracleData.nftMintAllowed;
-    } else if (oracleData.nftMintAllowed && typeof oracleData.nftMintAllowed === 'object') {
-      // Check for .bool property (ConStr format)
-      mintingAllowed = (oracleData.nftMintAllowed as any).bool === true;
-    }
+    // Check if minting is allowed using boolDataToBoolean (handles all Bool formats)
+    let mintingAllowed = boolDataToBoolean(oracleData.nftMintAllowed);
     
     // Development override for minting check
     const isDev = process.env.NODE_ENV === 'development';
@@ -141,10 +135,6 @@ export async function POST(req: NextRequest) {
     if (isDev && hasOverride) {
       console.log('[api/cardano/mint-bulk] DEV MODE: Overriding mint check for project:', projectId);
       mintingAllowed = true;
-      // Override the nftMintAllowed flag in development
-      if (oracleData.nftMintAllowed && typeof oracleData.nftMintAllowed === 'object') {
-        (oracleData.nftMintAllowed as any).bool = true;
-      }
     }
     
     if (!mintingAllowed) {
@@ -240,13 +230,8 @@ export async function GET(req: NextRequest) {
       ? Number(oracleData.maxMints.int)
       : Number(oracleData.maxMints);
 
-    // Check if minting is allowed (handle different Bool formats)
-    let mintingAllowedStatus = false;
-    if (typeof oracleData.nftMintAllowed === 'boolean') {
-      mintingAllowedStatus = oracleData.nftMintAllowed;
-    } else if (oracleData.nftMintAllowed && typeof oracleData.nftMintAllowed === 'object') {
-      mintingAllowedStatus = (oracleData.nftMintAllowed as any).bool === true;
-    }
+    // Check if minting is allowed using boolDataToBoolean (handles all Bool formats)
+    const mintingAllowedStatus = boolDataToBoolean(oracleData.nftMintAllowed);
 
     const maxBulkQuantity = Math.min(50, maxMints - currentIndex);
 
