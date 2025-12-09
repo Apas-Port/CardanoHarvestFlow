@@ -55,17 +55,12 @@ export interface Project {
     unitCost: number;
   };
 
-  // NFT Metadata (for minting)
+  // NFT Metadata
   metadata?: {
     name?: string;
     image?: string;
     description?: string;
-    mediaType?: string;
-    attributes?: Array<{
-      trait_type: string;
-      value: string | number;
-    }>;
-    [key: string]: unknown;
+    [key: string]: any;
   };
 }
 

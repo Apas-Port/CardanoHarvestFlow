@@ -3,8 +3,9 @@
  * Development script to check oracle status and provide quick fixes
  * 
  * Usage:
- *   npm run check-oracle -- <projectId>
+ *   npm run check-oracle -- <projectId> [network]
  *   npm run check-oracle -- mizuki-frieren
+ *   npm run check-oracle -- mizuki-frieren mainnet
  */
 
 import { config } from 'dotenv';
@@ -14,26 +15,39 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 config({ path: resolve(process.cwd(), '.env') });
 
-const projectId = process.argv[2];
+const args = process.argv.slice(2);
+const projectIdRaw = args[0];
+const networkArg = args[1]?.toLowerCase();
 
-if (!projectId) {
+// Support both --mainnet flag and mainnet argument
+const isMainnet = networkArg === 'mainnet' || args.includes('--mainnet');
+
+if (!projectIdRaw) {
   console.error('Error: Project ID is required');
-  console.log('Usage: npm run check-oracle -- <projectId>');
+  console.log('Usage: npm run check-oracle -- <projectId> [network]');
   console.log('Example: npm run check-oracle -- mizuki-frieren');
+  console.log('Example (mainnet): npm run check-oracle -- mizuki-frieren mainnet');
   process.exit(1);
 }
 
+const projectId: string = projectIdRaw;
+
 async function checkOracle() {
+  const network = isMainnet ? 'Mainnet' : 'Preprod';
   console.log('🔍 Checking Oracle Status for Project:', projectId);
+  console.log('🌐 Network:', network);
   console.log('=====================================\n');
 
   const isDev = process.env.NODE_ENV !== 'production';
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
+  // Add dev=1 parameter only for preprod (not mainnet)
+  const devParam = isMainnet ? '' : '&dev=1';
+
   try {
     // 1. Check mint endpoint status
     console.log('1️⃣  Checking Mint API Status...');
-    const mintStatusResponse = await fetch(`${baseUrl}/api/cardano/mint?projectId=${projectId}&dev=1`);
+    const mintStatusResponse = await fetch(`${baseUrl}/api/cardano/mint?projectId=${projectId}${devParam}`);
     const mintStatus = await mintStatusResponse.json();
 
     if (mintStatusResponse.ok) {
@@ -54,7 +68,8 @@ async function checkOracle() {
         console.log('   Run: npm run init -- --project=' + projectId);
       } else if (mintStatus.error && mintStatus.error.includes('Project not found')) {
         console.log('\n⚠️  Project not found!');
-        console.log('   Check if project ID "' + projectId + '" exists in dev-projects.json');
+        const projectFile = isMainnet ? 'projects.json' : 'dev-projects.json';
+        console.log(`   Check if project ID "${projectId}" exists in ${projectFile}`);
       } else if (mintStatus.error && mintStatus.error.includes('Failed to fetch oracle data')) {
         console.log('\n⚠️  Failed to fetch oracle data!');
         console.log('   This might indicate:');
@@ -72,7 +87,7 @@ async function checkOracle() {
 
     // 2. Check toggle-minting endpoint
     console.log('\n2️⃣  Checking Toggle Minting Status...');
-    const toggleStatusResponse = await fetch(`${baseUrl}/api/cardano/toggle-minting?projectId=${projectId}&dev=1`);
+    const toggleStatusResponse = await fetch(`${baseUrl}/api/cardano/toggle-minting?projectId=${projectId}${devParam}`);
     const toggleStatus = await toggleStatusResponse.json();
 
     if (toggleStatusResponse.ok) {
@@ -101,9 +116,9 @@ async function checkOracle() {
       console.log('You can enable minting by calling the setNFTMinting function.\n');
 
       // Create a dev override file
-      if (isDev) {
+      if (isDev && !isMainnet) {
         console.log('💡 Creating development override file...');
-        await createDevOverride();
+        await createDevOverride(projectId);
       }
     } else {
       console.log('\n✅ Minting is ENABLED! You should be able to mint NFTs.');
@@ -118,7 +133,7 @@ async function checkOracle() {
   }
 }
 
-async function createDevOverride() {
+async function createDevOverride(projectId: string) {
   // Create a simple override mechanism for development
   const overrideContent = `
 # Development Override for NFT Minting

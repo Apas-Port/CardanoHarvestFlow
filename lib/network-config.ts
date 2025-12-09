@@ -145,9 +145,23 @@ export function getServerNetworkConfig(source?: Request | URL | string): ServerN
     blockfrostApiKey: isMainnet
       ? (process.env.BLOCKFROST_MAINNET_API_KEY || process.env.BLOCKFROST_MAINNET_PROJECT_ID || '')
       : (process.env.BLOCKFROST_API_KEY || process.env.BLOCKFROST_PROJECT_ID || ''),
-    treasuryAddress: isMainnet
-      ? (process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS || 'addr1q887g4a5jsg57ul36vnnn99aqddgkesawvgzjlshsxyhpxjngs2np8tlavv9w6xnz58snl0czq3ywsapt9dkqxpx738sgp968m')
-      : (process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS || 'addr_test1qr87g4a5jsg57ul36vnnn99aqddgkesawvgzjlshsxyhpxjngs2np8tlavv9w6xnz58snl0czq3ywsapt9dkqxpx738sthc6ty'),
+    treasuryAddress: (() => {
+      const address = isMainnet
+        ? process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS
+        : process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV;
+      
+      if (!address) {
+        throw new Error(
+          `Treasury address is not configured. Please set ${
+            isMainnet
+              ? 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS'
+              : 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV'
+          } environment variable.`
+        );
+      }
+      
+      return address;
+    })(),
     policyId: process.env.HARVESTFLOW_POLICY_ID || '5b1a3dc00d40b402a72f72b9a5f0c1197e9ddc50a7366a68d719e653',
     explorerUrl: isMainnet
       ? 'https://cardanoscan.io'
@@ -189,9 +203,23 @@ export function getClientNetworkConfig(): NetworkConfig {
     network,
     isMainnet,
     isTestnet: !isMainnet,
-    treasuryAddress: isMainnet
-      ? (process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS || 'invalid')
-      : (process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS || 'invalid'),
+    treasuryAddress: (() => {
+      const address = isMainnet
+        ? process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS
+        : process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV;
+      
+      if (!address) {
+        throw new Error(
+          `Treasury address is not configured. Please set ${
+            isMainnet
+              ? 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS'
+              : 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV'
+          } environment variable.`
+        );
+      }
+      
+      return address;
+    })(),
     policyId: process.env.HARVESTFLOW_POLICY_ID || '5b1a3dc00d40b402a72f72b9a5f0c1197e9ddc50a7366a68d719e653',
     explorerUrl: isMainnet
       ? 'https://cardanoscan.io'
