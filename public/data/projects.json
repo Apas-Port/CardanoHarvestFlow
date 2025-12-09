@@ -33,18 +33,10 @@
     "mintPriceLovelace": 1900000,
     "metadata": {
       "name": "Harvestflow Test 1",
-      "image": "ipfs://QmY53cEvybvh9BkHjgGeP2C8mG5FEjLcnVjegkGeTmqEQ1",
-      "description": "This is a test project for the Harvestflow platform. It is used to test the functionality of the platform and the ability to mint NFTs.",
+      "image": "ipfs://bafybeiejwfhilsk3uwcjiyqbujpq4ykmuju54tomwxczdmg4ttghhl2jia",
+      "description": "This is a Test Project 1",
       "mediaType": "image/png",
       "attributes": [
-        {
-          "trait_type": "Collection",
-          "value": "Harvestflow_Test1"
-        },
-        {
-          "trait_type": "Project",
-          "value": "Cardano Test 1"
-        },
         {
           "trait_type": "APY",
           "value": "55%"
