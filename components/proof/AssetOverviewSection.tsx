@@ -1,6 +1,7 @@
 import React from "react";
 
 import { ExtraSmallTile } from "@/components/common/DataTiles";
+import { useGmsData } from "@/hooks/use-gms-data";
 
 import { RwaAsset } from "@/lib/types";
 import { Project } from "@/lib/project";
@@ -17,9 +18,11 @@ const AssetOverviewSection: React.FC<{
   project?: Project;
   notRwaFounded: boolean;
 }> = ({ asset, project, notRwaFounded = false }) => {
-  // Mock metrics data
-  const totalDistance = 12345; // km
-  const totalTravelTime = 456; // hours
+  // Fetch GMS data for mileage and driving time
+  const { metrics } = useGmsData({ deviceId: asset?.deviceId ? String(asset.deviceId) : undefined });
+  
+  const totalDistance = metrics.totalMileage; // km
+  const totalTravelTime = metrics.totalDrivingTime; // hours
 
   if(notRwaFounded) {
     return (
