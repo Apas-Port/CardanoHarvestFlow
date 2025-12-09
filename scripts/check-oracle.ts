@@ -3,8 +3,9 @@
  * Development script to check oracle status and provide quick fixes
  * 
  * Usage:
- *   npm run check-oracle -- <projectId>
+ *   npm run check-oracle -- <projectId> [network]
  *   npm run check-oracle -- mizuki-frieren
+ *   npm run check-oracle -- mizuki-frieren mainnet
  */
 
 import { config } from 'dotenv';
@@ -14,26 +15,40 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.local') });
 config({ path: resolve(process.cwd(), '.env') });
 
-const projectId = process.argv[2];
+const args = process.argv.slice(2);
+const projectIdRaw = args[0];
+const networkArg = args[1]?.toLowerCase();
 
-if (!projectId) {
+// Support both --mainnet flag and mainnet argument
+const isMainnet = networkArg === 'mainnet' || args.includes('--mainnet');
+
+if (!projectIdRaw) {
   console.error('Error: Project ID is required');
-  console.log('Usage: npm run check-oracle -- <projectId>');
+  console.log('Usage: npm run check-oracle -- <projectId> [network]');
   console.log('Example: npm run check-oracle -- mizuki-frieren');
+  console.log('Example (mainnet): npm run check-oracle -- mizuki-frieren mainnet');
   process.exit(1);
 }
 
+const projectId: string = projectIdRaw;
+
 async function checkOracle() {
+  const network = isMainnet ? 'Mainnet' : 'Preprod';
   console.log('🔍 Checking Oracle Status for Project:', projectId);
+  console.log('🌐 Network:', network);
   console.log('=====================================\n');
 
   const isDev = process.env.NODE_ENV !== 'production';
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
+  // Add network parameter to explicitly specify network
+  // This ensures the API uses the correct network even if env vars are not set
+  const networkParam = isMainnet ? '&network=mainnet' : '&network=preprod';
+
   try {
     // 1. Check mint endpoint status
     console.log('1️⃣  Checking Mint API Status...');
-    const mintStatusResponse = await fetch(`${baseUrl}/api/cardano/mint?projectId=${projectId}&dev=1`);
+    const mintStatusResponse = await fetch(`${baseUrl}/api/cardano/mint?projectId=${projectId}${networkParam}`);
     const mintStatus = await mintStatusResponse.json();
 
     if (mintStatusResponse.ok) {
@@ -45,16 +60,35 @@ async function checkOracle() {
       console.log(`   - Price: ${mintStatus.lovelacePrice / 1_000_000} ADA`);
     } else {
       console.error('❌ Oracle Error:', mintStatus.error);
-      if (mintStatus.error.includes('Oracle UTxO not found')) {
+      console.error('   Status Code:', mintStatusResponse.status);
+      if (mintStatus.details) {
+        console.error('   Details:', JSON.stringify(mintStatus.details, null, 2));
+      }
+      if (mintStatus.error && mintStatus.error.includes('Oracle UTxO not found')) {
         console.log('\n⚠️  Oracle needs to be initialized!');
         console.log('   Run: npm run init -- --project=' + projectId);
+      } else if (mintStatus.error && mintStatus.error.includes('Project not found')) {
+        console.log('\n⚠️  Project not found!');
+        const projectFile = isMainnet ? 'projects.json' : 'dev-projects.json';
+        console.log(`   Check if project ID "${projectId}" exists in ${projectFile}`);
+      } else if (mintStatus.error && mintStatus.error.includes('Failed to fetch oracle data')) {
+        console.log('\n⚠️  Failed to fetch oracle data!');
+        console.log('   This might indicate:');
+        console.log('   1. Oracle UTxO not found (Oracle not initialized)');
+        console.log('   2. Network configuration issue');
+        console.log('   3. Blockfrost API issue');
+        if (mintStatus.details) {
+          console.log('   Oracle Address:', mintStatus.details.oracleAddress);
+          console.log('   Network:', mintStatus.details.network);
+        }
+        console.log('   Try running: npm run init -- --project=' + projectId);
       }
       return;
     }
 
     // 2. Check toggle-minting endpoint
     console.log('\n2️⃣  Checking Toggle Minting Status...');
-    const toggleStatusResponse = await fetch(`${baseUrl}/api/cardano/toggle-minting?projectId=${projectId}&dev=1`);
+    const toggleStatusResponse = await fetch(`${baseUrl}/api/cardano/toggle-minting?projectId=${projectId}${networkParam}`);
     const toggleStatus = await toggleStatusResponse.json();
 
     if (toggleStatusResponse.ok) {
@@ -83,9 +117,9 @@ async function checkOracle() {
       console.log('You can enable minting by calling the setNFTMinting function.\n');
 
       // Create a dev override file
-      if (isDev) {
+      if (isDev && !isMainnet) {
         console.log('💡 Creating development override file...');
-        await createDevOverride();
+        await createDevOverride(projectId);
       }
     } else {
       console.log('\n✅ Minting is ENABLED! You should be able to mint NFTs.');
@@ -100,7 +134,7 @@ async function checkOracle() {
   }
 }
 
-async function createDevOverride() {
+async function createDevOverride(projectId: string) {
   // Create a simple override mechanism for development
   const overrideContent = `
 # Development Override for NFT Minting

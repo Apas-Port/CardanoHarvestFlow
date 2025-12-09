@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
         };
       });
       
-      const hasOracleNFT = assets.some(a => a.isOracleNFT);
+      const hasOracleNFT = assets.some((a: { isOracleNFT: boolean }) => a.isOracleNFT);
       
       return {
         index: idx,
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    const oracleUtxos = utxoSummary.filter(u => u.hasOracleNFT);
+    const oracleUtxos = utxoSummary.filter((u: { hasOracleNFT: boolean }) => u.hasOracleNFT);
     const allPolicyIds = new Set<string>();
     const allAssets: Array<{ unit: string; policyId: string; tokenName: string }> = [];
     

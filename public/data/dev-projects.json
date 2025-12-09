@@ -29,7 +29,7 @@
     "startDate": "1 Oct 2025",
     "listing": true,
     "maxMints": 100,
-    "paramUtxoEnvKey": "PARAM_UTXO_RUMDUOL_DEV",
+    "paramUtxoEnvKey": "PARAM_UTXO_DEV_001",
     "mintPriceLovelace": 1969750,
     "metadata": {
       "name": "Harvestflow Cambodia TukTuk NFT",
@@ -51,6 +51,63 @@
         },
         {
           "trait_type": "Lending Period 111",
+          "value": "12 months"
+        }
+      ]
+    }
+  },
+  {
+    "id": "002",
+    "num": 2,
+    "title": "Cardano Dev 2",
+    "subTitle": "CAMBODIA TUKTUK LOAN",
+    "description": "The project involves crypto asset lending to a company that operates a tuktuk loan business in Cambodia, a country that has experienced remarkable growth with a 7% GDP growth rate over the past five years and has attracted over 6 million tourists.",
+    "apy": 55,
+    "lendingType": "ADA",
+    "network": "Cardano",
+    "capacity": 55,
+    "unitPrice": 1.9,
+    "collectionName": "Harvestflow_Dev_2",
+    "mainImage": "/images/project/1/main.png",
+    "previewImage": "/images/project/1/preview.jpg",
+    "tuktukImage": "/images/project/1/tuktuk.png",
+    "policyId": "289538c55b504bf0ceabaa78e198fe90941d777f0f9c0c83e9a6c3de",
+    "legacyPolicyIds": [],
+    "status": "active",
+    "interestEarned": "base number",
+    "interestRate": 55,
+    "repaymentMethod": "AT MATURITY",
+    "lendingPeriod": 12,
+    "assetId": [
+      "79",
+      "80",
+      "81"
+    ],
+    "startDate": "1 Oct 2025",
+    "listing": true,
+    "maxMints": 55,
+    "paramUtxoEnvKey": "PARAM_UTXO_DEV_002",
+    "mintPriceLovelace": 1900000,
+    "metadata": {
+      "name": "Harvestflow Cambodia TukTuk NFT",
+      "image": "ipfs://bafybeiejwfhilsk3uwcjiyqbujpq4ykmuju54tomwxczdmg4ttghhl2jia",
+      "description": "Support Cambodia's TukTuk loan business through this NFT",
+      "mediaType": "image/png",
+      "attributes": [
+        {
+          "trait_type": "Collection",
+          "value": "Harvestflow"
+        },
+        {
+          "trait_type": "Project",
+          "value": "Cambodia TukTuk Loan 222"
+        },
+        {
+          "trait_type": "APY",
+          "value": "55%"
+        },
+        {
+          "trait_type": "Lending Period 222",
           "value": "12 months"
         }
       ]

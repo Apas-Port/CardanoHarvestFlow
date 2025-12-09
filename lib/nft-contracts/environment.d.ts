@@ -14,7 +14,6 @@ declare global {
 
         COLLECTION_NAME?: string;
 
-        MINT_METADATA_JSON_PATH?: string;
         //exact UNIX timestamp, no sub-second precision
         // MATURATION_TIME?: bigint;
         MATURATION_TIME?: string;

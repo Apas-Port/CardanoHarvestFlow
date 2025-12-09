@@ -11,6 +11,7 @@
     "scripts:init": "tsx scripts/init-project.ts",
     "scripts:toggle-minting": "tsx scripts/toggle-minting.ts",
     "scripts:check-oracle": "tsx scripts/check-oracle.ts",
+    "scripts:check-metadata": "tsx scripts/check-metadata-length.ts",
     "scripts:list": "tsx scripts/list-holders.ts",
     "scripts:airdrop": "tsx scripts/airdrop-refund.ts",
     "scripts:balance": "tsx scripts/hf-cli-runner.ts balance"

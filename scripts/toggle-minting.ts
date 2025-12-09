@@ -14,8 +14,9 @@
 
 import { BrowserWallet } from '@meshsdk/core';
 import { BlockfrostProvider } from '@meshsdk/core';
-import { MeshTxBuilder } from '@meshsdk/core';
+import { MeshTxBuilder, MeshWallet } from '@meshsdk/core';
 import { MeshPlutusNFTContract } from '../lib/nft-contracts/offchain';
+import { boolDataToBoolean, resolveNumericValue } from '../lib/harvestflow-contract';
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
@@ -111,18 +112,21 @@ async function main() {
     console.log('Fetching oracle data...');
     const oracleData = await contract.getOracleData();
     
-    // Check current minting status (handle different Bool formats)
-    let currentMintingStatus = false;
-    if (typeof oracleData.nftMintAllowed === 'boolean') {
-      currentMintingStatus = oracleData.nftMintAllowed;
-    } else if (oracleData.nftMintAllowed && typeof oracleData.nftMintAllowed === 'object') {
-      currentMintingStatus = (oracleData.nftMintAllowed as any).bool === true;
-    }
+    // Check current minting status (handle different Bool formats using boolDataToBoolean)
+    const currentMintingStatus = boolDataToBoolean(oracleData.nftMintAllowed);
+    
+    // Check current trading status (handle different Bool formats using boolDataToBoolean)
+    const currentTradingStatus = boolDataToBoolean(oracleData.nftTradeAllowed);
+    
+    // Resolve numeric values for display
+    const currentIndex = resolveNumericValue(oracleData.nftIndex, 0);
+    const maxMints = resolveNumericValue(oracleData.maxMints, 0);
     
     console.log('\nCurrent Status:');
     console.log(`- Minting Enabled: ${currentMintingStatus}`);
-    console.log(`- Current Index: ${oracleData.nftIndex}`);
-    console.log(`- Max Mints: ${oracleData.maxMints}`);
+    console.log(`- Trading Enabled: ${currentTradingStatus}`);
+    console.log(`- Current Index: ${currentIndex}`);
+    console.log(`- Max Mints: ${maxMints}`);
     console.log(`- Fee Collector: ${oracleData.feeCollectorAddress}`);
 
     if (checkStatus) {
@@ -132,48 +136,70 @@ async function main() {
 
     // For enable/disable, we need wallet access
     if (enable || disable) {
+      const targetStatus = enable;
       console.log('\n⚠️  To enable/disable minting, you need access to the admin wallet.');
       console.log('The admin wallet must control the fee_address:', oracleData.feeCollectorAddress);
       
-      console.log('\nOptions:');
-      console.log('1. Configure server wallet with admin credentials');
-      console.log('2. Use a browser-based admin interface with wallet connection');
-      console.log('3. Manually build and sign the transaction with your wallet');
-      
-      console.log('\nTransaction that would be built:');
-      console.log(`- Action: ${enable ? 'EnableNFTMinting' : 'DisableNFTMinting'}`);
-      console.log(`- Requires signature from: ${oracleData.feeCollectorAddress}`);
-      console.log(`- Updates oracle datum at: ${contract.oracleAddress}`);
-      
-      // If you have wallet access, uncomment and configure the following:
-      /*
-      // Example with wallet seed phrase (DO NOT COMMIT!)
-      const walletSeed = process.env.ADMIN_WALLET_SEED;
+      // Try to use wallet from environment variable
+      const walletSeed = process.env.PAYMENT_MNEMONIC;
       if (walletSeed) {
-        const wallet = new MeshWallet({
-          networkId: isMainnet ? 1 : 0,
-          fetcher: provider,
-          submitter: provider,
-          key: {
-            type: 'mnemonic',
-            words: walletSeed.split(' '),
-          },
-        });
+        console.log('\n🔐 Using wallet from PAYMENT_MNEMONIC environment variable...');
+        try {
+          const wallet = new MeshWallet({
+            networkId: isMainnet ? 1 : 0,
+            fetcher: provider,
+            submitter: provider,
+            key: {
+              type: 'mnemonic',
+              words: walletSeed.split(' '),
+            },
+          });
+          
+          // Initialize wallet (required before use)
+          await wallet.init();
+          
+          // Update contract with wallet
+          contract.mesh = new MeshTxBuilder({
+            fetcher: provider,
+            submitter: provider,
+            evaluator: provider,
+          });
+          contract.wallet = wallet;
+          
+          console.log('\n📝 Building transaction...');
+          console.log(`- Action: ${targetStatus ? 'EnableNFTMinting' : 'DisableNFTMinting'}`);
+          console.log(`- Updates oracle datum at: ${contract.oracleAddress}`);
+          
+          const txHex = await contract.setNFTMinting(targetStatus);
+          console.log('\n🔐 Signing transaction...');
+          const signedTx = await wallet.signTx(txHex);
+          console.log('\n📤 Submitting transaction...');
+          const txHash = await wallet.submitTx(signedTx);
+          console.log(`\n✅ Transaction submitted: ${txHash}`);
+          console.log(`✅ Minting is now ${targetStatus ? 'ENABLED' : 'DISABLED'}`);
+          console.log(`\n⏳ Waiting for transaction confirmation...`);
+          console.log(`   Check transaction: https://${isMainnet ? 'cardanoscan.io' : 'preprod.cardanoscan.io'}/transaction/${txHash}`);
+        } catch (error) {
+          console.error('\n❌ Error submitting transaction:', error);
+          console.log('\n⚠️  Transaction submission failed. Please check:');
+          console.log('   1. PAYMENT_MNEMONIC is correct');
+          console.log('   2. Wallet has sufficient funds');
+          console.log('   3. Wallet controls the fee_address:', oracleData.feeCollectorAddress);
+          process.exit(1);
+        }
+      } else {
+        console.log('\n⚠️  PAYMENT_MNEMONIC environment variable not found.');
+        console.log('\nOptions:');
+        console.log('1. Set PAYMENT_MNEMONIC in .env.local with the admin wallet seed phrase');
+        console.log('2. Use a browser-based admin interface with wallet connection');
+        console.log('3. Manually build and sign the transaction with your wallet');
         
-        // Update contract with wallet
-        contract.mesh = new MeshTxBuilder({
-          fetcher: provider,
-          submitter: provider,
-          evaluator: provider,
-        });
-        contract.wallet = wallet;
-        
-        console.log('\nBuilding transaction...');
-        const txHash = await contract.setNFTMinting(enable);
-        console.log(`✅ Transaction submitted: ${txHash}`);
-        console.log(`Minting is now ${enable ? 'ENABLED' : 'DISABLED'}`);
+        console.log('\nTransaction that would be built:');
+        console.log(`- Action: ${targetStatus ? 'EnableNFTMinting' : 'DisableNFTMinting'}`);
+        console.log(`- Requires signature from: ${oracleData.feeCollectorAddress}`);
+        console.log(`- Updates oracle datum at: ${contract.oracleAddress}`);
+        process.exit(1);
       }
-      */
     }
 
   } catch (error) {
