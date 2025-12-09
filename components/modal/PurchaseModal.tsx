@@ -49,7 +49,8 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ lng, project, quantity, s
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const handleQuantityChange = (amount: number) => {
-    setQuantity(Math.max(1, quantity + amount));
+    const newQuantity = quantity + amount;
+    setQuantity(Math.max(1, Math.min(15, newQuantity)));
   };
   
   const openTooltip = () => {
@@ -354,8 +355,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ lng, project, quantity, s
                         />
                         <button
                           onClick={() => handleQuantityChange(1)}
-                          className="font-['Function_Pro',sans-serif] rounded-lg text-black font-medium text-lg bg-gradient-to-b from-[#F9D78C] to-[#E7B45A] hover:opacity-80 transition-opacity duration-200 py-2 px-3 m-1 w-14 h-14 text-[32px] font-bold cursor-pointer"
+                          className="font-['Function_Pro',sans-serif] rounded-lg text-black font-medium text-lg bg-gradient-to-b from-[#F9D78C] to-[#E7B45A] hover:opacity-80 transition-opacity duration-200 py-2 px-3 m-1 w-14 h-14 text-[32px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label={t('modals.purchase.quantityIncrease')}
+                          disabled={quantity >= 15}
                         >
                           ＋
                         </button>

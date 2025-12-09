@@ -35,6 +35,7 @@ pub type OracleDatum {
 
 pub type OracleRedeemer {
   MintPlutusNFT
+  BulkMintPlutusNFT { quantity: Int }
   StopOracle
   EnableNFTMinting
   DisableNFTMinting
@@ -93,6 +94,30 @@ validator oracle {
             |> value_geq(from_lovelace(lovelace_price))
         let is_nft_mint_allowed = nft_mint_allowed
         is_output_value_clean? && is_count_updated? && is_fee_paid? && is_nft_mint_allowed?
+      }
+      (BulkMintPlutusNFT { quantity }, [_], [only_output]) -> {
+        let is_output_value_clean = list.length(flatten(only_output.value)) == 2
+        let is_count_updated =
+          only_output.datum == InlineDatum(
+            OracleDatum {
+              count: count + quantity,
+              lovelace_price,
+              fee_address,
+              nft_mint_allowed,
+              nft_trade_allowed,
+              expected_apr_numerator,
+              expected_apr_denominator,
+              maturation_time,
+              max_mints,
+            },
+          )
+        let total_fee = lovelace_price * quantity
+        let is_fee_paid =
+          get_all_value_to(outputs, fee_address)
+            |> value_geq(from_lovelace(total_fee))
+        let is_nft_mint_allowed = nft_mint_allowed
+        let is_quantity_valid = quantity > 0
+        is_output_value_clean? && is_count_updated? && is_fee_paid? && is_nft_mint_allowed? && is_quantity_valid?
       }
       (StopOracle, [_], _) -> {
         let is_oracle_nft_burnt =
@@ -781,6 +806,158 @@ test fail_stop_with_oracle_nft_not_burnt() {
   let tx =
     mock_stop_oracle_tx(
       StopOracleTestCase { is_oracle_nft_burnt: False, is_owner_signed: True },
+    )
+
+  !oracle.spend(Some(datum), redeemer, mock_utxo_ref(0, 0), tx)
+}
+
+type BulkMintTestCase {
+  is_oracle_output_clean: Bool,
+  is_fee_paid: Bool,
+  is_count_updated: Bool,
+  is_nft_mint_allowed: Bool,
+  quantity: Int,
+}
+
+fn mock_bulk_mint_tx(test_case: BulkMintTestCase) -> Transaction {
+  let BulkMintTestCase {
+    is_oracle_output_clean,
+    is_fee_paid,
+    is_count_updated,
+    is_nft_mint_allowed,
+    quantity,
+  } = test_case
+
+  let input_value =
+    from_asset(mock_policy_id(0), "", 1) |> add("", "", 2_000_000)
+
+  let total_fee = 1_000_000 * quantity
+
+  mocktail_tx()
+    |> tx_in(True, mock_tx_hash(0), 0, input_value, mock_script_address(0, None))
+    |> tx_in_inline_datum(
+        True,
+        OracleDatum {
+          count: 0,
+          lovelace_price: 1_000_000,
+          fee_address: mock_pub_key_address(0, None),
+          nft_mint_allowed: is_nft_mint_allowed,
+          nft_trade_allowed: True,
+          expected_apr_numerator: 0,
+          expected_apr_denominator: 1,
+          maturation_time: 0,
+          max_mints: 10,
+        },
+      )
+    |> tx_out(is_oracle_output_clean, mock_script_address(0, None), input_value)
+    |> tx_out(
+        !is_oracle_output_clean,
+        mock_script_address(0, None),
+        input_value |> add(mock_policy_id(1), "", 1),
+      )
+    |> tx_out_inline_datum(
+        True,
+        OracleDatum {
+          count: if is_count_updated {
+            quantity
+          } else {
+            0
+          },
+          lovelace_price: 1_000_000,
+          fee_address: mock_pub_key_address(0, None),
+          nft_mint_allowed: is_nft_mint_allowed,
+          nft_trade_allowed: True,
+          expected_apr_numerator: 0,
+          expected_apr_denominator: 1,
+          maturation_time: 0,
+          max_mints: 10,
+        },
+      )
+    |> tx_out(is_fee_paid, mock_pub_key_address(0, None), from_lovelace(total_fee))
+    |> complete()
+}
+
+test success_bulk_mint() {
+  let datum =
+    OracleDatum {
+      count: 0,
+      lovelace_price: 1_000_000,
+      fee_address: mock_pub_key_address(0, None),
+      nft_mint_allowed: True,
+      nft_trade_allowed: True,
+      expected_apr_numerator: 0,
+      expected_apr_denominator: 1,
+      maturation_time: 0,
+      max_mints: 10,
+    }
+  let redeemer = BulkMintPlutusNFT { quantity: 3 }
+  let tx =
+    mock_bulk_mint_tx(
+      BulkMintTestCase {
+        is_oracle_output_clean: True,
+        is_fee_paid: True,
+        is_count_updated: True,
+        is_nft_mint_allowed: True,
+        quantity: 3,
+      },
+    )
+
+  oracle.spend(Some(datum), redeemer, mock_utxo_ref(0, 0), tx)
+}
+
+test fail_bulk_mint_without_fee_paid() {
+  let datum =
+    OracleDatum {
+      count: 0,
+      lovelace_price: 1_000_000,
+      fee_address: mock_pub_key_address(0, None),
+      nft_mint_allowed: True,
+      nft_trade_allowed: True,
+      expected_apr_numerator: 0,
+      expected_apr_denominator: 1,
+      maturation_time: 0,
+      max_mints: 10,
+    }
+  let redeemer = BulkMintPlutusNFT { quantity: 3 }
+
+  let tx =
+    mock_bulk_mint_tx(
+      BulkMintTestCase {
+        is_oracle_output_clean: True,
+        is_fee_paid: False,
+        is_count_updated: True,
+        is_nft_mint_allowed: True,
+        quantity: 3,
+      },
+    )
+
+  !oracle.spend(Some(datum), redeemer, mock_utxo_ref(0, 0), tx)
+}
+
+test fail_bulk_mint_with_nft_mint_not_allowed() {
+  let datum =
+    OracleDatum {
+      count: 0,
+      lovelace_price: 1_000_000,
+      fee_address: mock_pub_key_address(0, None),
+      nft_mint_allowed: False,
+      nft_trade_allowed: True,
+      expected_apr_numerator: 0,
+      expected_apr_denominator: 1,
+      maturation_time: 0,
+      max_mints: 10,
+    }
+  let redeemer = BulkMintPlutusNFT { quantity: 3 }
+
+  let tx =
+    mock_bulk_mint_tx(
+      BulkMintTestCase {
+        is_oracle_output_clean: True,
+        is_fee_paid: True,
+        is_count_updated: True,
+        is_nft_mint_allowed: False,
+        quantity: 3,
+      },
     )
 
   !oracle.spend(Some(datum), redeemer, mock_utxo_ref(0, 0), tx)
