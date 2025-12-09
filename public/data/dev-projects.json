@@ -29,7 +29,7 @@
     "startDate": "1 Oct 2025",
     "listing": true,
     "maxMints": 100,
-    "paramUtxoEnvKey": "PARAM_UTXO_RUMDUOL_DEV",
+    "paramUtxoEnvKey": "PARAM_UTXO_DEV_001",
     "mintPriceLovelace": 1969750,
     "metadata": {
       "name": "Harvestflow Cambodia TukTuk NFT",

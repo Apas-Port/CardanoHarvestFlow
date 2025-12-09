@@ -3,6 +3,9 @@ import path from 'path';
 
 type PlainRecord = Record<string, unknown>;
 
+// Lazy import to avoid circular dependency
+let getProjectById: ((projectId: string) => Promise<any>) | null = null;
+
 interface MetadataGroup {
   default?: PlainRecord;
   tokens?: unknown;
@@ -209,15 +212,41 @@ function resolveMetadataSegments(
   return segments;
 }
 
-async function loadMetadataConfig(): Promise<MetadataConfig | null> {
-  const envPath = process.env.MINT_METADATA_JSON_PATH?.trim();
-  if (!envPath) {
+async function loadMetadataConfig(projectId?: string): Promise<MetadataConfig | null> {
+  // Try to load from project metadataJsonPath first
+  let metadataPath: string | null = null;
+  
+  if (projectId) {
+    try {
+      // Lazy import to avoid circular dependency
+      if (!getProjectById) {
+        const projectModule = await import('./project');
+        getProjectById = projectModule.getProjectById;
+      }
+      
+      if (getProjectById) {
+        const project = await getProjectById(projectId);
+        if (project?.metadataJsonPath) {
+          metadataPath = project.metadataJsonPath;
+        }
+      }
+    } catch (error) {
+      console.warn('[mint-metadata] Failed to load project for metadataJsonPath:', error);
+    }
+  }
+
+  // Fallback to environment variable
+  if (!metadataPath) {
+    metadataPath = process.env.MINT_METADATA_JSON_PATH?.trim() || null;
+  }
+
+  if (!metadataPath) {
     return null;
   }
 
-  const resolvedPath = path.isAbsolute(envPath)
-    ? envPath
-    : path.resolve(process.cwd(), envPath);
+  const resolvedPath = path.isAbsolute(metadataPath)
+    ? metadataPath
+    : path.resolve(process.cwd(), metadataPath);
 
   try {
     const stat = await fs.stat(resolvedPath);
@@ -247,7 +276,28 @@ async function loadMetadataConfig(): Promise<MetadataConfig | null> {
   }
 }
 
-export function getMintMetadataFilePath(): string | null {
+export async function getMintMetadataFilePath(projectId?: string): Promise<string | null> {
+  // Try to get from project first
+  if (projectId) {
+    try {
+      if (!getProjectById) {
+        const projectModule = await import('./project');
+        getProjectById = projectModule.getProjectById;
+      }
+      
+      if (getProjectById) {
+        const project = await getProjectById(projectId);
+        if (project?.metadataJsonPath) {
+          const metadataPath = project.metadataJsonPath;
+          return path.isAbsolute(metadataPath) ? metadataPath : path.resolve(process.cwd(), metadataPath);
+        }
+      }
+    } catch (error) {
+      console.warn('[mint-metadata] Failed to load project for metadataJsonPath:', error);
+    }
+  }
+
+  // Fallback to environment variable
   const envPath = process.env.MINT_METADATA_JSON_PATH?.trim();
   if (!envPath) {
     return null;
@@ -270,7 +320,7 @@ export async function resolveMintMetadataForToken(params: {
   assetName?: string;
   additionalContext?: PlainRecord;
 }): Promise<MintMetadataResolution | null> {
-  const config = await loadMetadataConfig();
+  const config = await loadMetadataConfig(params.projectId);
   if (!config) {
     return null;
   }

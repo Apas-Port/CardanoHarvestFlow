@@ -337,11 +337,36 @@ async function handleInit(networkId, shared) {
     ensureCollateralUtxo: true,
   });
 
-  const lovelacePrice = Number(requireEnv('FEE_PRICE_LOVELACE'));
-  const expectedAprNumerator = Number(requireEnv('EXPECTED_APR_NUMERATOR'));
-  const expectedAprDenominator = Number(requireEnv('EXPECTED_APR_DENOMINATOR'));
-  const maturationTime = BigInt(requireEnv('MATURATION_TIME'));
-  const maxMints = BigInt(requireEnv('MAX_MINTS'));
+  // Load parameters from project JSON (preferred) or fallback to environment variables
+  const project = shared.project;
+  
+  if (!project) {
+    throw new Error('Project is required. Use --project-id=<projectId> or set project configuration in projects.json');
+  }
+
+  const lovelacePrice = project.mintPriceLovelace 
+    ? Number(project.mintPriceLovelace)
+    : Number(requireEnv('FEE_PRICE_LOVELACE'));
+  
+  // APY to APR: expectedApr = [numerator, denominator] = [apy, 100]
+  const expectedAprNumerator = project.apy !== undefined
+    ? Number(project.apy)
+    : Number(requireEnv('EXPECTED_APR_NUMERATOR'));
+  const expectedAprDenominator = 100; // Always use 100 as denominator when using APY from project
+  
+  // Calculate maturation time from lending period or use env value
+  let maturationTime;
+  if (project.lendingPeriod !== undefined) {
+    const currentTime = Date.now();
+    const lendingPeriodMs = Number(project.lendingPeriod) * 30 * 24 * 60 * 60 * 1000; // months to ms
+    maturationTime = BigInt(currentTime + lendingPeriodMs);
+  } else {
+    maturationTime = BigInt(requireEnv('MATURATION_TIME'));
+  }
+  
+  const maxMints = project.maxMints !== undefined
+    ? BigInt(project.maxMints)
+    : BigInt(requireEnv('MAX_MINTS'));
 
   console.log('Booting protocol with settings:', {
     lovelacePrice,
@@ -349,6 +374,7 @@ async function handleInit(networkId, shared) {
     expectedAprDenominator,
     maturationTime: maturationTime.toString(),
     maxMints: maxMints.toString(),
+    source: project ? 'project.json' : 'environment variables',
   });
 
   const { paramUtxo } = await bootProtocol(

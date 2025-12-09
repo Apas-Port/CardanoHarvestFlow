@@ -62,6 +62,9 @@ export interface Project {
     description?: string;
     [key: string]: any;
   };
+
+  // Optional path to metadata JSON file (alternative to MINT_METADATA_JSON_PATH)
+  metadataJsonPath?: string;
 }
 
 let cachedProjects: Project[] | null = null;

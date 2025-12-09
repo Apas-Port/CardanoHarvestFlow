@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       metadataSources: string[];
     }
 
-    const metadataSourcePath = getMintMetadataFilePath();
+    const metadataSourcePath = await getMintMetadataFilePath();
     let resolvedMetadata: MetadataEntry[] = [];
 
     if (metadataSourcePath) {
