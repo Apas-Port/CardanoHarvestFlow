@@ -2,19 +2,19 @@
   {
     "id": "001",
     "num": 1,
-    "title": "Cardano Mainnet Test Project 1",
-    "subTitle": "TEST PROJECT 1",
+    "title": "Cardano Test 1",
+    "subTitle": "TEST 1",
     "description": "This is a test project for the Harvestflow platform. It is used to test the functionality of the platform and the ability to mint NFTs.",
     "apy": 5,
     "lendingType": "ADA",
     "network": "Cardano",
     "capacity": 55,
     "unitPrice": 1.9,
-    "collectionName": "Harvestflow_Mainnet_Test_Project_1",
+    "collectionName": "Harvestflow_Test1",
     "mainImage": "/images/project/1/main.png",
     "previewImage": "/images/project/1/preview.jpg",
     "tuktukImage": "/images/project/1/tuktuk.png",
-    "policyId": "7e720ab005e17d8021bcdc8237030c46b421368cc9bd8f205f0da103",
+    "policyId": "846b5e33813965964d332c7cca551037affb422f2fedefb749391294",
     "legacyPolicyIds": [],
     "status": "active",
     "interestEarned": "base number",
@@ -32,18 +32,18 @@
     "paramUtxoEnvKey": "PARAM_UTXO_MAINNET_TEST_001",
     "mintPriceLovelace": 1900000,
     "metadata": {
-      "name": "Harvestflow Mainnet Test Project 1 NFT",
+      "name": "Harvestflow Test 1",
       "image": "ipfs://QmY53cEvybvh9BkHjgGeP2C8mG5FEjLcnVjegkGeTmqEQ1",
       "description": "This is a test project for the Harvestflow platform. It is used to test the functionality of the platform and the ability to mint NFTs.",
       "mediaType": "image/png",
       "attributes": [
         {
           "trait_type": "Collection",
-          "value": "Harvestflow_Mainnet_Test_Project_1"
+          "value": "Harvestflow_Test1"
         },
         {
           "trait_type": "Project",
-          "value": "Cardano Mainnet Test Project 1"
+          "value": "Cardano Test 1"
         },
         {
           "trait_type": "APY",
