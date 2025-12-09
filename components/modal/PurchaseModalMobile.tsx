@@ -360,8 +360,9 @@ const PurchaseModalMobile: React.FC<PurchaseModalMobileProps> = ({
                       />
                       <button
                         onClick={() => handleQuantityChange(1)}
-                        className="font-['Function_Pro',sans-serif] rounded-lg text-black font-medium text-lg bg-gradient-to-b from-[#F9D78C] to-[#E7B45A] hover:opacity-80 transition-opacity duration-200 py-2 px-2 m-1 w-10 h-10 text-xl font-bold cursor-pointer"
+                        className="font-['Function_Pro',sans-serif] rounded-lg text-black font-medium text-lg bg-gradient-to-b from-[#F9D78C] to-[#E7B45A] hover:opacity-80 transition-opacity duration-200 py-2 px-2 m-1 w-10 h-10 text-xl font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         aria-label={t('modals.purchase.quantityIncrease')}
+                        disabled={quantity >= 15}
                       >
                         ＋
                       </button>

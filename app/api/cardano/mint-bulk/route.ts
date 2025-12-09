@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
     }
 
-    if (!quantity || quantity < 1 || quantity > 50) {
-      return NextResponse.json({ error: 'quantity must be between 1 and 50' }, { status: 400 });
+    if (!quantity || quantity < 1 || quantity > 15) {
+      return NextResponse.json({ error: 'quantity must be between 1 and 15' }, { status: 400 });
     }
 
     // Load contract WITHOUT server wallet (requireWallet: false)
