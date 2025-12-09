@@ -236,13 +236,7 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
       }
     };
 
-    hasToken.forEach((tokenIds, projectId) => {
-      const project = projects.find((p) => p.id === projectId);
-      if (project && tokenIds.length > 0) {
-        addContribution(project, tokenIds.length);
-      }
-    });
-
+    // hasTokenはcardanoNFTsから生成されているため、cardanoNFTsのみから計算して重複を避ける
     const projectCardanoNFTs = cardanoNFTs.filter(
       (nft) => nft.isProjectNFT && nft.projectId,
     );
@@ -286,7 +280,7 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
       totalValue: summary.totalValue,
       apr,
     };
-  }, [hasToken, projects, cardanoNFTs]);
+  }, [projects, cardanoNFTs]);
 
   const totalLendingAmount = totalEquityAmount; // These are the same value
   const [isLoadingTokenEvents, setIsLoadingTokenEvents] = useState(false);
@@ -332,8 +326,17 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
         if (response.ok) {
           const data = await response.json();
           
+          // projects.jsonに存在するプロジェクトのみをフィルタリング
+          const filteredEvents = data.events.filter((event: any) => {
+            const project = projects.find(p => p.id === event.project_id);
+            if (!project) {
+              console.log(`Filtering out token event with project_id ${event.project_id} - not found in projects.json`);
+            }
+            return project !== undefined;
+          });
+          
           // Enrich token events with project data
-          const enrichedEvents: TokenEvent[] = data.events.map((event: any) => {
+          const enrichedEvents: TokenEvent[] = filteredEvents.map((event: any) => {
             const project = projects.find(p => p.id === event.project_id);
             return {
               ...event,
@@ -344,7 +347,7 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
           });
           
           setTokenEvents(enrichedEvents);
-          console.log('Fetched token events:', enrichedEvents);
+          console.log('Fetched token events (filtered):', enrichedEvents);
         }
       } catch (error) {
         console.error('Error fetching token events:', error);
@@ -361,11 +364,10 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
     if (projects.length > 0 && cardanoNFTs.length > 0) {
       const newHasToken = new Map<string, number[]>();
       
-      // Check cardanoNFTs for project NFTs
+      // isProjectNFT: trueのNFTのみを考慮（projects.jsonにマッチしたNFTのみ）
       cardanoNFTs.forEach((nft) => {
         if (nft.isProjectNFT && nft.projectId && nft.tokenId) {
-          const projectIdPrefix = nft.projectId.toUpperCase();
-          const project = projects.find((p) => p.id.toUpperCase().startsWith(projectIdPrefix));
+          const project = projects.find((p) => p.id === nft.projectId);
           if (project) {
             const currentTokens = newHasToken.get(project.id) || [];
             const tokenNumber = Number.parseInt(nft.tokenId, 10);
@@ -431,6 +433,11 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
       setIsLoadingNFTs(true);
       console.log('Starting to fetch NFTs from wallet...');
       console.log('BrowserWallet object:', browserWallet);
+      console.log('Available projects for matching:', normalizedProjects.map(entry => ({
+        projectId: entry.project.id,
+        title: entry.project.title,
+        policyIds: entry.policyIds
+      })));
 
       try {
         const assets = (await browserWallet.getAssets()) as WalletAsset[];
@@ -460,6 +467,7 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
               const metadataImage = coerceToString(onChainMetadata.image);
               const metadataDescription = coerceToString(onChainMetadata.description);
 
+              // projects.jsonを正として、そこに定義されたプロジェクトのpolicyIdにマッチするNFTのみを処理
               const matchingEntry = normalizedProjects.find((entry) =>
                 entry.policyIds.includes(policyIdRaw),
               );
@@ -467,8 +475,12 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
               const matchingProject = matchingEntry?.project;
 
               if (!matchingProject) {
+                // projects.jsonに存在しないプロジェクトのNFTはスキップ
+                console.log(`Skipping NFT with policyId ${policyIdRaw} - not found in projects.json`);
                 return null;
               }
+
+              console.log(`Matched NFT with policyId ${policyIdRaw} to project ${matchingProject.id} (${matchingProject.title})`);
 
               const serialFromName = extractSerialNumber(decodedAssetName);
               const serialNumber = metadataSerial ?? serialFromName ?? undefined;

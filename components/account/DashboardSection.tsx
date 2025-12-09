@@ -38,8 +38,8 @@ const AccountDashboardSection: React.FC<AccountDashboardSectionProps> = ({
         <div className="bg-white border-black border flex-1">
           <div className="flex flex-col xl:flex-row border-black xl:border-b xl:h-[50%]">
             <div className="w-full xl:w-[50%] grid grid-cols-1 grid-rows-1 xl:grid-cols-1 xl:grid-rows-1 border-b border-black xl:border-b-0">
-              <div className="flex items-center justify-center text-sm tracking-wide uppercase border-dashed xl:border-b border-black xl:max-h-[3em] border-r xl:border-r-0">TOTAL EQUITY(USD)</div>
-              <div className="flex items-center justify-center mt-6 mb-10 text-[1.5em] xl:text-[2em] uppercase xl:h-[50%] py-3 xl:py-0 font-medium">$ {totalEquityAmount.toFixed(2)}</div>
+              <div className="flex items-center justify-center text-sm tracking-wide uppercase border-dashed xl:border-b border-black xl:max-h-[3em] border-r xl:border-r-0">TOTAL EQUITY(ADA)</div>
+              <div className="flex items-center justify-center mt-6 mb-10 text-[1.5em] xl:text-[2em] uppercase xl:h-[50%] py-3 xl:py-0 font-medium">{totalEquityAmount.toFixed(2)} ADA</div>
             </div>
             <div className="w-full xl:w-[50%] grid grid-cols-1 grid-rows-1 xl:grid-cols-1 xl:grid-rows-1 xl:border-l border-b border-black  xl:border-b-0">
               <div className="flex items-center justify-center text-sm tracking-wide uppercase border-dashed xl:border-b border-black xl:max-h-[3em] border-r xl:border-r-0">Your APR</div>
@@ -49,11 +49,11 @@ const AccountDashboardSection: React.FC<AccountDashboardSectionProps> = ({
           <div className="flex flex-col xl:flex-row xl:h-[50%]">
             <div className="w-full xl:w-[50%] grid grid-cols-2 grid-rows-1 xl:grid-cols-1 xl:grid-rows-2 border-b border-black xl:border-b-0">
               <div className="flex items-center justify-center text-sm tracking-wide uppercase border-dashed xl:border-b border-black xl:max-h-[3em] border-r xl:border-r-0">Lending Now</div>
-              <div className="flex items-center justify-center mt-2 mb-10 text-[1.5em] xl:text-[2em] uppercase xl:h-[50%] py-3 xl:py-0 font-medium">$ {Math.round(totalLendingAmount).toLocaleString()}</div>
+              <div className="flex items-center justify-center mt-2 mb-10 text-[1.5em] xl:text-[2em] uppercase xl:h-[50%] py-3 xl:py-0 font-medium">{totalLendingAmount.toFixed(2)} ADA</div>
             </div>
             <div className="w-full xl:w-[50%] grid grid-cols-2 grid-rows-1 xl:grid-cols-1 xl:grid-rows-2 xl:border-l border-black">
               <div className="flex items-center justify-center text-sm tracking-wide uppercase border-dashed xl:border-b border-black xl:max-h-[3em] border-r xl:border-r-0">TOTAL INTEREST</div>
-              <div className="flex items-center justify-center mt-2 mb-10 text-[1.5em] xl:text-[2em] uppercase xl:h-[50%] py-3 xl:py-0 font-medium">$ 0</div>
+              <div className="flex items-center justify-center mt-2 mb-10 text-[1.5em] xl:text-[2em] uppercase xl:h-[50%] py-3 xl:py-0 font-medium">0 ADA</div>
             </div>
           </div>
         </div>

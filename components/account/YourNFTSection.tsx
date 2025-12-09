@@ -208,99 +208,70 @@ const YourNFTSection: React.FC<YourNFTSectionProps> = ({ projects, hasToken, isL
         <div className="flex flex-col gap-14 xl:gap-[60px]">
           <div className="flex flex-col gap-10">
             {(() => {
-              // Count Harvestflow format NFTs
-              const harvestflowCount = cardanoNFTs.filter(nft => {
-                if (nft.metadata?.name) {
-                  const nameMatch = nft.metadata.name.match(/^Harvestflow\s+#\d+$/i);
-                  if (nameMatch) return true;
-                }
-                
-                if (nft.assetName) {
-                  let decodedName = nft.assetName;
-                  try {
-                    if (/^[0-9a-fA-F]+$/.test(nft.assetName)) {
-                      decodedName = Buffer.from(nft.assetName, 'hex').toString('utf8');
-                    }
-                  } catch {}
-                  
-                  const assetMatch = decodedName.match(/^Harvestflow\s+#\d+$/i);
-                  if (assetMatch) return true;
-                }
-                
-                return false;
-              }).length;
+              // isProjectNFT: trueのNFT（projects.jsonにマッチしたNFT）を取得
+              const projectNFTs = cardanoNFTs.filter(nft => nft.isProjectNFT);
               
-              return ownedProjects.length === 0 && harvestflowCount === 0;
+              return ownedProjects.length === 0 && projectNFTs.length === 0;
             })() ? (
               <EmptyState />
             ) : (
               <>
-
-              {/* Cardano NFTs Section */}
+              {/* Cardano NFTs Section - projects.jsonにマッチしたNFTをすべて表示 */}
               {(() => {
-                // Filter NFTs to only show "Harvestflow #<number>" format
-                const harvestflowNFTs = cardanoNFTs.filter(nft => {
-                  // Check metadata name
-                  if (nft.metadata?.name) {
-                    const nameMatch = nft.metadata.name.match(/^Harvestflow\s+#\d+$/i);
-                    if (nameMatch) return true;
-                  }
-                  
-                  // Check asset name (might be hex encoded)
-                  if (nft.assetName) {
-                    // Try to decode hex if needed
-                    let decodedName = nft.assetName;
-                    try {
-                      // If assetName looks like hex (all hex characters), try to decode
-                      if (/^[0-9a-fA-F]+$/.test(nft.assetName)) {
-                        decodedName = Buffer.from(nft.assetName, 'hex').toString('utf8');
-                      }
-                    } catch {
-                      // If decode fails, use original
-                    }
-                    
-                    const assetMatch = decodedName.match(/^Harvestflow\s+#\d+$/i);
-                    if (assetMatch) return true;
-                  }
-                  
-                  return false;
-                });
+                // isProjectNFT: trueのNFTのみを表示（projects.jsonに存在するプロジェクトのNFTのみ）
+                const projectNFTs = cardanoNFTs.filter(nft => nft.isProjectNFT);
                 
-                console.log("harvestflowNFTs", harvestflowNFTs)
-                if (harvestflowNFTs.length === 0) return null;
+                console.log("projectNFTs (isProjectNFT: true):", projectNFTs);
+                if (projectNFTs.length === 0) return null;
+                
+                // プロジェクトごとにグループ化
+                const nftsByProject = new Map<string, CardanoNft[]>();
+                projectNFTs.forEach(nft => {
+                  const projectId = nft.projectId || 'unknown';
+                  const existing = nftsByProject.get(projectId) || [];
+                  existing.push(nft);
+                  nftsByProject.set(projectId, existing);
+                });
                 
                 return (
                   <div className="flex flex-col gap-10">
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => toggleCollapse('cardano-nfts')}>
-                      <h3 className="text-bodyLarge24 xl:text-heading5Larger24_30 uppercase font-medium">
-                        Harvestflow ({harvestflowNFTs.length})
-                      </h3>
-                      {collapsedState['cardano-nfts'] ? <IoIosArrowDown /> : <IoIosArrowUp />}
-                    </div>
-                    {!collapsedState['cardano-nfts'] && (
-                      <div className="overflow-x-auto">
-                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                          {harvestflowNFTs
-                            .sort((a, b) => {
-                              // Extract number from "Harvestflow #X" format
-                              const getNumber = (nft: CardanoNft) => {
-                                const name = nft.metadata?.name || '';
-                                const match = name.match(/Harvestflow\s+#(\d+)/i);
-                                return match ? parseInt(match[1], 10) : 0;
-                              };
-                              
-                              return getNumber(a) - getNumber(b);
-                            })
-                            .map((nft, index) => (
-                              <CardanoNFTCard 
-                                key={`cardano-${nft.unit || index}`}
-                                nft={nft}
-                                project={nftProjectMap.get(nft.unit) || null}
-                              />
-                            ))}
+                    {Array.from(nftsByProject.entries()).map(([projectId, nfts]) => {
+                      const project = projects.find(p => p.id === projectId);
+                      const projectName = project?.title || project?.collectionName || 'Harvestflow';
+                      
+                      return (
+                        <div key={projectId} className="flex flex-col gap-10">
+                          <div className="flex items-center gap-2 cursor-pointer" onClick={() => toggleCollapse(`project-${projectId}`)}>
+                            <h3 className="text-bodyLarge24 xl:text-heading5Larger24_30 uppercase font-medium">
+                              {projectName} ({nfts.length})
+                            </h3>
+                            {collapsedState[`project-${projectId}`] ? <IoIosArrowDown /> : <IoIosArrowUp />}
+                          </div>
+                          {!collapsedState[`project-${projectId}`] && (
+                            <div className="overflow-x-auto">
+                              <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+                                {nfts
+                                  .sort((a, b) => {
+                                    // tokenIdまたはserialNumberでソート
+                                    const aSerial = a.tokenId || (a.metadata?.serialNumber ? String(a.metadata.serialNumber) : '0');
+                                    const bSerial = b.tokenId || (b.metadata?.serialNumber ? String(b.metadata.serialNumber) : '0');
+                                    const aId = Number.parseInt(aSerial, 10);
+                                    const bId = Number.parseInt(bSerial, 10);
+                                    return aId - bId;
+                                  })
+                                  .map((nft, index) => (
+                                    <CardanoNFTCard 
+                                      key={`cardano-${nft.unit || index}`}
+                                      nft={nft}
+                                      project={nftProjectMap.get(nft.unit) || project || null}
+                                    />
+                                  ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
                 );
               })()}
