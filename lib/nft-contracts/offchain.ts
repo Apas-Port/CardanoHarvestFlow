@@ -191,7 +191,18 @@ import {
     ) => {
       let utxos: UTxO[] = userUtxos;
       if (this.fetcher && userUtxos.length === 0) {
-        utxos = await this.fetcher.fetchAddressUTxOs(walletAddress);
+        // Pass assetHex to fetcher if it's CustomBlockfrostFetcher to use asset-specific endpoint
+        if (typeof (this.fetcher as any).fetchAddressUTxOs === 'function') {
+          try {
+            utxos = await (this.fetcher as any).fetchAddressUTxOs(walletAddress, assetHex);
+          } catch (error) {
+            // Fallback to fetching all UTxOs if asset-specific fetch fails
+            console.warn('[getAddressUtxosWithToken] Asset-specific fetch failed, falling back to all UTxOs:', error);
+            utxos = await (this.fetcher as any).fetchAddressUTxOs(walletAddress);
+          }
+        } else {
+          utxos = await this.fetcher.fetchAddressUTxOs(walletAddress);
+        }
       }
       // utxos.forEach(utxo => {
       //   utxo.output.amount.forEach(amount => {
@@ -922,11 +933,25 @@ import {
      */
     getOracleData = async (): Promise<OracleData> => {
       const oracleNftPolicyId = resolveScriptHash(this.getOracleNFTCbor(), "V3");
-      const oracleUtxo = (
-        await this.getAddressUtxosWithToken(this.oracleAddress, oracleNftPolicyId)
-      )[0]!;
+      const utxos = await this.getAddressUtxosWithToken(this.oracleAddress, oracleNftPolicyId);
+      
+      if (!utxos || utxos.length === 0) {
+        throw new Error(
+          `Oracle UTxO not found at address ${this.oracleAddress} with policy ID ${oracleNftPolicyId}. ` +
+          `The oracle might not be initialized for this project.`
+        );
+      }
+      
+      const oracleUtxo = utxos[0];
+      if (!oracleUtxo || !oracleUtxo.output || !oracleUtxo.output.plutusData) {
+        throw new Error(
+          `Oracle UTxO found but missing required data at address ${this.oracleAddress}. ` +
+          `The oracle might be corrupted or not properly initialized.`
+        );
+      }
+      
       const oracleDatum: OracleDatum = parseDatumCbor(
-        oracleUtxo!.output.plutusData!,
+        oracleUtxo.output.plutusData,
       );
   
       const nftIndex = oracleDatum.fields[0].int;
