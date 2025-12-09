@@ -158,9 +158,9 @@ async function listNFTHolders(projectId: string, network: 'preprod' | 'mainnet')
         }
 
         // Update holder info
-        const holderInfo = holdersMap.get(holderAddress) || {
+        const holderInfo: HolderInfo = holdersMap.get(holderAddress) || {
           address: holderAddress,
-          tokenIds: [],
+          tokenIds: [] as number[],
           quantity: 0
         };
         

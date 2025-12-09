@@ -483,11 +483,6 @@ export async function mintNftForProject({ projectId, metadata, recipientAddress 
     tokenMetadata,
     undefined,
     true,
-    {
-      recipientAddress: recipientAddress ?? undefined,
-      requiredSignerHash: recipientInfo?.pubKeyHash,
-      minLovelaceForRecipient: String(minRecipientLovelace),
-    },
   );
 
   // NO SERVER SIGNATURE - user will sign with their wallet
