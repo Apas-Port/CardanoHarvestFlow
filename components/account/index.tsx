@@ -236,13 +236,7 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
       }
     };
 
-    hasToken.forEach((tokenIds, projectId) => {
-      const project = projects.find((p) => p.id === projectId);
-      if (project && tokenIds.length > 0) {
-        addContribution(project, tokenIds.length);
-      }
-    });
-
+    // hasTokenはcardanoNFTsから生成されているため、cardanoNFTsのみから計算して重複を避ける
     const projectCardanoNFTs = cardanoNFTs.filter(
       (nft) => nft.isProjectNFT && nft.projectId,
     );
@@ -286,7 +280,7 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
       totalValue: summary.totalValue,
       apr,
     };
-  }, [hasToken, projects, cardanoNFTs]);
+  }, [projects, cardanoNFTs]);
 
   const totalLendingAmount = totalEquityAmount; // These are the same value
   const [isLoadingTokenEvents, setIsLoadingTokenEvents] = useState(false);
