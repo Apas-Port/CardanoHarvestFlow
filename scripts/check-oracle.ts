@@ -41,13 +41,14 @@ async function checkOracle() {
   const isDev = process.env.NODE_ENV !== 'production';
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-  // Add dev=1 parameter only for preprod (not mainnet)
-  const devParam = isMainnet ? '' : '&dev=1';
+  // Add network parameter to explicitly specify network
+  // This ensures the API uses the correct network even if env vars are not set
+  const networkParam = isMainnet ? '&network=mainnet' : '&network=preprod';
 
   try {
     // 1. Check mint endpoint status
     console.log('1️⃣  Checking Mint API Status...');
-    const mintStatusResponse = await fetch(`${baseUrl}/api/cardano/mint?projectId=${projectId}${devParam}`);
+    const mintStatusResponse = await fetch(`${baseUrl}/api/cardano/mint?projectId=${projectId}${networkParam}`);
     const mintStatus = await mintStatusResponse.json();
 
     if (mintStatusResponse.ok) {
@@ -87,7 +88,7 @@ async function checkOracle() {
 
     // 2. Check toggle-minting endpoint
     console.log('\n2️⃣  Checking Toggle Minting Status...');
-    const toggleStatusResponse = await fetch(`${baseUrl}/api/cardano/toggle-minting?projectId=${projectId}${devParam}`);
+    const toggleStatusResponse = await fetch(`${baseUrl}/api/cardano/toggle-minting?projectId=${projectId}${networkParam}`);
     const toggleStatus = await toggleStatusResponse.json();
 
     if (toggleStatusResponse.ok) {
