@@ -31,6 +31,59 @@ export function useCardanoAPIMint() {
   const [mintStatus, setMintStatus] = useState<APIMintStatus>({ status: 'idle' });
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Helper function to record token event with retry logic
+  const recordTokenEventWithRetry = useCallback(async (
+    walletAddress: string,
+    projectId: string,
+    tokenIds: string[],
+    amount: number,
+    txHash: string,
+    maxRetries = 3
+  ): Promise<void> => {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(appendDevQuery('/api/token-event'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            walletAddress,
+            projectId,
+            tokenIds,
+            amount,
+            event: 'mint',
+            txHash,
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Token event API returned ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.message === 'Token event recorded successfully') {
+          console.log('Token mint event recorded successfully');
+          return; // 成功
+        }
+        
+        throw new Error('Token event API returned unsuccessful response');
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.warn(`Token event recording attempt ${attempt + 1} failed:`, lastError);
+        
+        if (attempt < maxRetries - 1) {
+          // 指数バックオフ: 1秒、2秒、4秒
+          const delayMs = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+    
+    // すべてのリトライが失敗した場合
+    throw new Error(`Failed to record token event after ${maxRetries} attempts: ${lastError?.message}`);
+  }, []);
+
   const mintProjectNFT = useCallback(async (
     project: Project,
     quantity: number = 1
@@ -157,8 +210,9 @@ export function useCardanoAPIMint() {
           .txInRedeemerValue(mConStr0([]))
           .txInScript(scripts.oracleCbor)
           .txInInlineDatumPresent()
+          // Let Mesh SDK auto-calculate minimum lovelace for Oracle UTxO output
+          // This ensures sufficient lovelace for the updated datum
           .txOut(scripts.oracleAddress, [
-            { unit: 'lovelace', quantity: oracleData.oracleLovelace },
             { unit: oracleData.oracleNftPolicyId, quantity: '1' }
           ])
           .txOutInlineDatumValue(updatedOracleDatum, 'JSON');
@@ -173,9 +227,9 @@ export function useCardanoAPIMint() {
           .mintingScript(scripts.nftCbor)
           .mintRedeemerValue(mNftMintOrBurn('RMint'));
 
+        // Let Mesh SDK auto-calculate minimum lovelace required for NFT output
         tx.txOut(recipientAddress, [
           { unit: mintedAssetUnit, quantity: '1' },
-          { unit: 'lovelace', quantity: '2000000' },
         ]);
 
         if (!tokenMetadata || !tokenMetadata.image) {
@@ -277,34 +331,34 @@ export function useCardanoAPIMint() {
 
         setMintStatus({ status: 'confirming' });
 
-        try {
-          await fetch(appendDevQuery('/api/token-event'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              walletAddress: recipientAddress,
-              projectId: project.id,
-              tokenIds: [tokenId.toString()],
-              amount: feeAda,
-              event: 'mint',
-              txHash,
-            }),
-          });
-          console.log('Token mint event recorded successfully');
-        } catch (eventError) {
-          console.error('Failed to record token event:', eventError);
-        }
+        // Record token event with retry logic - must complete before returning
+        await recordTokenEventWithRetry(
+          recipientAddress,
+          project.id,
+          [tokenId.toString()],
+          feeAda,
+          txHash
+        );
 
-        const oracleUpdated = await waitForOracleUpdate(tokenId + 1);
-        
-        if (!oracleUpdated) {
-          console.warn(`[useCardanoAPIMint] Oracle confirmation timed out for token ${tokenId}, but transaction ${txHash} was submitted successfully`);
-          setMintStatus({
-            status: 'warning',
-            txHash,
-            warning: 'Transaction submitted successfully but oracle confirmation is delayed. Your NFT should appear in your wallet soon.'
-          });
-        }
+        // Start oracle update check in background (don't wait for it)
+        waitForOracleUpdate(tokenId + 1).then((oracleUpdated) => {
+          if (!oracleUpdated) {
+            console.warn(`[useCardanoAPIMint] Oracle confirmation timed out for token ${tokenId}, but transaction ${txHash} was submitted successfully`);
+            setMintStatus((prevStatus) => {
+              // Only update if still in confirming or success status
+              if (prevStatus.status === 'confirming' || prevStatus.status === 'success') {
+                return {
+                  ...prevStatus,
+                  status: 'warning',
+                  warning: 'Transaction submitted successfully but oracle confirmation is delayed. Your NFT should appear in your wallet soon.'
+                };
+              }
+              return prevStatus;
+            });
+          }
+        }).catch((error) => {
+          console.warn('[useCardanoAPIMint] Oracle update check failed:', error);
+        });
 
         return {
           txHash,
@@ -375,7 +429,7 @@ export function useCardanoAPIMint() {
     } finally {
       setIsProcessing(false);
     }
-  }, [connected, walletName, setMintStatus]);
+  }, [connected, walletName, setMintStatus, recordTokenEventWithRetry]);
 
   const mintProjectNFTBulk = useCallback(async (
     project: Project,
@@ -486,8 +540,9 @@ export function useCardanoAPIMint() {
         .txInRedeemerValue(mOracleRedeemer("BulkMintPlutusNFT", quantity))
         .txInScript(scripts.oracleCbor)
         .txInInlineDatumPresent()
+        // Let Mesh SDK auto-calculate minimum lovelace for Oracle UTxO output
+        // This ensures sufficient lovelace for the updated datum (which may be larger)
         .txOut(scripts.oracleAddress, [
-          { unit: 'lovelace', quantity: oracleData.oracleLovelace },
           { unit: oracleData.oracleNftPolicyId, quantity: '1' }
         ])
         .txOutInlineDatumValue(updatedOracleDatum, 'JSON');
@@ -568,23 +623,15 @@ export function useCardanoAPIMint() {
       tx.metadataValue('721', totalMetadata);
       
       // Send all NFTs to recipient
-      // Cardanoでは、各NFTに対して最小Lovelace量が必要
-      // 基本: 1,000,000 lovelace (1 ADA)
-      // 各NFT追加: 約150,000 lovelace (0.15 ADA) - 安全のため多めに設定
-      // エラーメッセージから、15個のNFTには約3,025,620 lovelaceが必要
-      const baseLovelace = 1_000_000; // 基本1 ADA
-      const nftLovelacePerToken = 150_000; // 各NFTあたり（安全のため多め）
-      const minLovelaceForOutput = baseLovelace + (mintAssets.length * nftLovelacePerToken);
-      
-      console.log(`[useCardanoAPIMint] Calculating lovelace for ${mintAssets.length} NFTs: ${minLovelaceForOutput} lovelace`);
-      
-      let nftOutputs: Array<{ unit: string; quantity: string }> = [
-        { unit: 'lovelace', quantity: minLovelaceForOutput.toString() }
-      ];
+      // Let Mesh SDK auto-calculate minimum lovelace required for NFT outputs
+      // This automatically handles network differences (Preprod vs Mainnet) and
+      // calculates the correct minimum based on protocol parameters
+      let nftOutputs: Array<{ unit: string; quantity: string }> = [];
       for (const asset of mintAssets) {
         const mintedAssetUnit = `${policyId}${asset.tokenNameHex}`;
         nftOutputs.push({ unit: mintedAssetUnit, quantity: '1' });
       }
+      // Don't specify lovelace - Mesh SDK will auto-calculate minimum required
       tx.txOut(recipientAddress, nftOutputs);
       
       // Complete transaction
@@ -660,7 +707,21 @@ export function useCardanoAPIMint() {
       const txHash = await wallet.submitTx(signedTx);
       
       console.log('[useCardanoAPIMint] Bulk mint submitted:', txHash);
-      setMintStatus({ status: 'idle' });
+      
+      setMintStatus({ status: 'confirming' });
+      
+      // Record token event with retry logic - must complete before returning
+      const feeAda = totalLovelace / 1_000_000;
+      const tokenIdsString = tokenIds.map(id => id.toString());
+      await recordTokenEventWithRetry(
+        recipientAddress,
+        project.id,
+        tokenIdsString,
+        feeAda,
+        txHash
+      );
+      
+      setMintStatus({ status: 'success', txHash, tokenIds });
       
       return {
         txHash: txHash,
@@ -744,10 +805,29 @@ export function useCardanoAPIMint() {
       }
       
       console.error('========================================');
-      setMintStatus({ status: 'idle' });
+      
+      let errorMessage = 'Failed to mint NFT';
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to record token event')) {
+          errorMessage = 'Transaction submitted successfully, but failed to save to database. Please contact support with your transaction hash.';
+        } else if (error.message.includes('UTxO Balance Insufficient') || error.message.includes('Insufficient')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('User declined')) {
+          errorMessage = 'Transaction cancelled by user';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setMintStatus({ 
+        status: 'error',
+        error: errorMessage
+      });
       throw error;
+    } finally {
+      setIsProcessing(false);
     }
-  }, [walletName, connected, setMintStatus, mintProjectNFT]);
+  }, [walletName, connected, setMintStatus, mintProjectNFT, recordTokenEventWithRetry]);
 
   return {
     mintProjectNFT,
