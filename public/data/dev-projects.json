@@ -230,7 +230,7 @@
   {
     "id": "005",
     "num": 5,
-    "title": "Cardano Tuktuk",
+    "title": "Cardano Tuktuk DEV",
     "subTitle": "Cambodia Tuktuk Loan Business",
     "description": "The project involves crypto asset lending to a company that operates a tuktuk loan business in Cambodia, a country that has experienced remarkable growth with a 7% GDP growth rate over the past five years and has attracted over 6 million tourists.",
     "apy": 8,
@@ -242,7 +242,7 @@
     "mainImage": "/images/project/cardano/main.png",
     "previewImage": "/images/project/cardano/preview.jpg",
     "tuktukImage": "/images/project/cardano/tuktuk.png",
-    "policyId": "",
+    "policyId": "5d5a881f352e0b9e7614ba89cdc9ebe0399e3a6d2db188ea45e3fc60",
     "legacyPolicyIds": [],
     "status": "active",
     "interestEarned": "base number",
