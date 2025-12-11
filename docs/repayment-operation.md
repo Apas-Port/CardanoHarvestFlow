@@ -58,8 +58,16 @@ pnpm scripts:airdrop 002 mainnet 5
 1. **Fetch NFT Holders**: Retrieves a list of NFT holders for the project
 2. **Calculate Amounts**: Calculates each address's holdings × ADA/NFT
 3. **Balance Check**: Verifies wallet has sufficient balance
-4. **Batch Processing**: Processes in batches of 50 addresses, considering transaction size limits
-5. **Log Saving**: Records each transaction result in JSON format
+4. **Airdrop Preview & Confirmation (2-step)**: Displays airdrop details and requires user confirmation before execution
+   - Recipient address list (up to 20 addresses displayed)
+   - Number of NFTs held and amount to send for each address
+   - Total amount to send
+   - Wallet balance and required balance
+   - Confirmation prompt: enter `y` or `yes` to proceed, anything else cancels
+5. **Batch Processing**: Processes in batches of 50 addresses, considering transaction size limits
+6. **Log Saving**: Records each transaction result in JSON format
+
+> **Important**: Sending funds is a high-risk operation, so a 2-step confirmation process is used. Review the airdrop details carefully, and if everything looks correct, enter `y` to proceed.
 
 ### 3. Example Output
 
@@ -78,6 +86,36 @@ Pending: 25
 💼 Wallet balance: 500 ADA
    Required: 250.5 ADA (including estimated fees)
 
+================================================================================
+📋 Airdrop Preview
+================================================================================
+Project ID: 001
+Network: preprod
+ADA per NFT: 10
+Recipients: 25
+Estimated batches: 1
+
+Recipient List:
+--------------------------------------------------------------------------------
+  1. addr1qxxxxx...
+     NFTs: 5 → Amount: 50 ADA
+  2. addr1qyyyyy...
+     NFTs: 3 → Amount: 30 ADA
+  ... 23 more addresses
+--------------------------------------------------------------------------------
+Total amount: 250 ADA
+   (250000000 lovelace)
+
+Wallet Info:
+  Current balance: 500 ADA
+  Required balance: 250.5 ADA
+  Balance difference: 249.5 ADA
+================================================================================
+
+Proceed with the airdrop? (y/N): y
+
+✅ Proceeding with airdrop...
+
 📦 Processing 25 recipients in batches of 50...
 
 [Batch 1/1] Processing 25 recipients...
@@ -91,6 +129,11 @@ Pending: 25
    Log file: logs/airdrop-001-preprod-2024-01-01T12-00-00.json
 ============================================================
 ```
+
+**Confirmation Prompt Behavior:**
+- Enter `y` or `yes` to proceed with the airdrop
+- Enter anything else (Enter key, `n`, `no`, etc.) to cancel
+- Default is `N` (do not proceed)
 
 ## Re-execution (Processing Only Failed Addresses)
 
