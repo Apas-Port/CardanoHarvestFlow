@@ -3,8 +3,8 @@ import { MeshWallet } from '@meshsdk/core';
 import { MeshPlutusNFTContract, WalletDisjunction } from './offchain';
 import { OracleData, ParamUtxo } from './type';
 
-export const bootProtocol = async (wallet: WalletDisjunction, contractBakedWithCollectionName: MeshPlutusNFTContract, lovelacePrice: number, expectedApr: [number, number], maturationTime: bigint, maxMints: bigint): Promise<{ paramUtxo: ParamUtxo; }> => {
-    const { tx: oracleTx, paramUtxo } = await contractBakedWithCollectionName.setupOracle(lovelacePrice, expectedApr, maturationTime, maxMints); // price in lovelace
+export const bootProtocol = async (wallet: WalletDisjunction, contractBakedWithCollectionName: MeshPlutusNFTContract, lovelacePrice: number, expectedApr: [number, number], maturationTime: bigint, maxMints: bigint, treasuryAddress: string): Promise<{ paramUtxo: ParamUtxo; }> => {
+    const { tx: oracleTx, paramUtxo } = await contractBakedWithCollectionName.setupOracle(lovelacePrice, expectedApr, maturationTime, maxMints, treasuryAddress); // price in lovelace
     console.log('tx to be submitted: ', oracleTx);
     console.log('associated paramUtxo: ', paramUtxo);
 

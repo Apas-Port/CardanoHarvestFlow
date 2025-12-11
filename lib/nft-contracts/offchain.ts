@@ -448,7 +448,7 @@ import {
      * const { tx, paramUtxo } = await contract.setupOracle(lovelacePrice);
      * ```
      */
-    setupOracle = async (lovelacePrice: number, expectedApr: [aprNumerator: number, aprDenominator: number], maturation_time: bigint, max_mints: bigint) => {
+    setupOracle = async (lovelacePrice: number, expectedApr: [aprNumerator: number, aprDenominator: number], maturation_time: bigint, max_mints: bigint, treasuryAddress: string) => {
       const { utxos, collateral, walletAddress } =
         await this.getWalletInfoForTx();
       if (utxos?.length <= 0) {
@@ -464,7 +464,7 @@ import {
       const policyId = resolveScriptHash(paramScript, "V3");
       const tokenName = "";
       const { pubKeyHash, stakeCredentialHash } =
-        deserializeAddress(walletAddress);
+        deserializeAddress(treasuryAddress.toLowerCase());
   
       const txHex = await this.mesh
         .txIn(
