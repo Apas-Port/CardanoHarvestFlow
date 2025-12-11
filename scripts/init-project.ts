@@ -120,6 +120,19 @@ async function main() {
     process.exit(1);
   }
 
+  // Get Treasury address from environment variables
+  const treasuryAddress = network === 'mainnet' 
+    ? env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS 
+    : env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV;
+
+  if (!treasuryAddress) {
+    const envKeyName = network === 'mainnet' 
+      ? 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS' 
+      : 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV';
+    console.error(`❌ Error: ${envKeyName} is not set in .env`);
+    process.exit(1);
+  }
+
   // Setup wallet and provider
   const networkId = network === 'mainnet' ? 1 : 0;
 
@@ -228,7 +241,8 @@ async function main() {
       lovelacePrice,
       expectedApr,
       maturationTime,
-      maxMints
+      maxMints,
+      treasuryAddress
     );
 
     console.log('\n✅ Oracle booted successfully!\n');
