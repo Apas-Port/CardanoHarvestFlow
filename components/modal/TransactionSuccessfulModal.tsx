@@ -36,6 +36,24 @@ const TransactionSuccessfulModal: React.FC<TransactionSuccessfulModalProps> = ({
     fetchProject();
   }, [isOpen, projectId]);
 
+  // Format totalLent to round up to 2 decimal places
+  const formatTotalLent = (totalLent: string | undefined): string => {
+    if (!totalLent) return '';
+    
+    // Extract numeric value from string like "4.9999999 ADA"
+    const match = totalLent.match(/^([\d.]+)\s*(.*)$/);
+    if (!match) return totalLent;
+    
+    const numericValue = parseFloat(match[1]);
+    const unit = match[2] || 'ADA';
+    
+    // Round up to 2 decimal places
+    const roundedValue = Math.ceil(numericValue * 100) / 100;
+    
+    // Format to 2 decimal places
+    return `${roundedValue.toFixed(2)} ${unit}`;
+  };
+
   if (!isOpen) {
     return null;
   }
@@ -93,7 +111,7 @@ const TransactionSuccessfulModal: React.FC<TransactionSuccessfulModalProps> = ({
                   </div>
                   <div className="flex justify-between border-b border-gray-200 py-3 md:py-2">
                     <span className="text-gray-600 text-sm md:text-base">TOTAL LENT</span>
-                    <span className="font-medium text-sm md:text-base">{transactionData?.totalLent}</span>
+                    <span className="font-medium text-sm md:text-base">{formatTotalLent(transactionData?.totalLent)}</span>
                   </div>
                   <div className="flex justify-between py-3 md:py-2">
                     <span className="text-gray-600 text-sm md:text-base">TOKEN ID</span>
