@@ -359,6 +359,19 @@ async function handleInit(networkId, shared) {
   }
   const maxMints = BigInt(project.maxMints);
 
+  // Get Treasury address from environment variables
+  const isMainnet = networkId === 1;
+  const treasuryAddress = isMainnet
+    ? process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS
+    : process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV;
+
+  if (!treasuryAddress) {
+    const envKeyName = isMainnet
+      ? 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS'
+      : 'NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV';
+    throw new Error(`${envKeyName} is not set in environment variables`);
+  }
+
   console.log('Booting protocol with settings:', {
     lovelacePrice,
     expectedAprNumerator,
@@ -375,6 +388,7 @@ async function handleInit(networkId, shared) {
     [expectedAprNumerator, expectedAprDenominator],
     maturationTime,
     maxMints,
+    treasuryAddress,
   );
 
   await persistParamUtxo(paramUtxo, { pathLike: paramPath, envKey: paramEnvKey });

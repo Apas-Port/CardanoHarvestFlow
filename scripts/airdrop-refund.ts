@@ -21,6 +21,7 @@ import { config } from 'dotenv';
 import * as path from 'path';
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
+import * as readline from 'readline';
 import { BlockfrostProvider, MeshTxBuilder, MeshWallet } from '@meshsdk/core';
 
 // Load environment variables
@@ -209,6 +210,69 @@ async function loadPreviousLog(logFilePath: string): Promise<Set<string>> {
   }
   
   return successfulAddresses;
+}
+
+function displayAirdropPreview(
+  recipients: Array<{ address: string; amountLovelace: string; quantity: number }>,
+  totalLovelace: bigint,
+  walletBalance: bigint,
+  requiredBalance: bigint,
+  adaPerNft: number,
+  projectId: string,
+  network: 'preprod' | 'mainnet'
+): void {
+  const BATCH_SIZE = 50;
+  const estimatedBatches = Math.ceil(recipients.length / BATCH_SIZE);
+
+  console.log('\n' + '='.repeat(80));
+  console.log('📋 Airdrop Preview');
+  console.log('='.repeat(80));
+  console.log(`Project ID: ${projectId}`);
+  console.log(`Network: ${network}`);
+  console.log(`ADA per NFT: ${adaPerNft}`);
+  console.log(`Recipients: ${recipients.length}`);
+  console.log(`Estimated batches: ${estimatedBatches}`);
+  console.log('');
+  console.log('Recipient List:');
+  console.log('-'.repeat(80));
+  
+  // Display up to 20 recipients, skip the rest
+  const displayLimit = 20;
+  for (let i = 0; i < Math.min(recipients.length, displayLimit); i++) {
+    const recipient = recipients[i];
+    const amountAda = Number(recipient.amountLovelace) / 1_000_000;
+    console.log(`  ${i + 1}. ${recipient.address}`);
+    console.log(`     NFTs: ${recipient.quantity} → Amount: ${amountAda} ADA`);
+  }
+  
+  if (recipients.length > displayLimit) {
+    console.log(`  ... ${recipients.length - displayLimit} more addresses`);
+  }
+  
+  console.log('-'.repeat(80));
+  console.log(`Total amount: ${Number(totalLovelace) / 1_000_000} ADA`);
+  console.log(`   (${totalLovelace.toString()} lovelace)`);
+  console.log('');
+  console.log('Wallet Info:');
+  console.log(`  Current balance: ${Number(walletBalance) / 1_000_000} ADA`);
+  console.log(`  Required balance: ${Number(requiredBalance) / 1_000_000} ADA`);
+  console.log(`  Balance difference: ${Number(walletBalance - requiredBalance) / 1_000_000} ADA`);
+  console.log('='.repeat(80) + '\n');
+}
+
+async function confirmAirdrop(): Promise<boolean> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  return new Promise((resolve) => {
+    rl.question('Proceed with the airdrop? (y/N): ', (answer) => {
+      rl.close();
+      const normalizedAnswer = answer.trim().toLowerCase();
+      resolve(normalizedAnswer === 'y' || normalizedAnswer === 'yes');
+    });
+  });
 }
 
 async function sendBatch(
@@ -408,6 +472,25 @@ async function airdropRefund(
         `but have ${Number(walletBalance) / 1_000_000} ADA`
       );
     }
+
+    // Display airdrop preview and confirm
+    displayAirdropPreview(
+      recipients,
+      totalLovelace,
+      walletBalance,
+      requiredBalance,
+      adaPerNft,
+      projectId,
+      network
+    );
+
+    const confirmed = await confirmAirdrop();
+    if (!confirmed) {
+      console.log('\n❌ Airdrop cancelled.\n');
+      return;
+    }
+
+    console.log('\n✅ Proceeding with airdrop...\n');
 
     // Initialize log
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);

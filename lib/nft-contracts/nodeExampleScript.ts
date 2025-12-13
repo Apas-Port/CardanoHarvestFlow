@@ -209,7 +209,15 @@ export const nodeExampleScript = async () => {
       console.log("maturationTime type: ", typeof maturationTime);
       console.log("maxMints type: ", typeof maxMints);
 
-      const { paramUtxo } = await bootProtocol(wallet, contractBakedWithCollectionName, feeLovelace, expectedApr, maturationTime, maxMints );
+      // Get Treasury address from environment variables
+      const treasuryAddress = process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV || 
+        process.env.NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS;
+
+      if (!treasuryAddress) {
+        throw new Error('Treasury address (NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS or NEXT_PUBLIC_PROJECT_TREASURY_ADDRESS_DEV) is required');
+      }
+
+      const { paramUtxo } = await bootProtocol(wallet, contractBakedWithCollectionName, feeLovelace, expectedApr, maturationTime, maxMints, treasuryAddress);
       await fs.writeFile('paramUtxo.json', JSON.stringify(paramUtxo));
       console.log("paramUtxo saved to disk. Don't forget to set PARAM_UTXO_PATH.");
 

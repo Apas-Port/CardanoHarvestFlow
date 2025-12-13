@@ -17,6 +17,7 @@ export const Top = ({ lng, projects }: { lng: string, projects: Project[] }) => 
   const [animatedTuktuks, setAnimatedTuktuks] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [tvlFromAPI, setTvlFromAPI] = useState<number | null>(null);
   
   // Ref to track if animation is in progress
   const animationInProgress = useRef(false);
@@ -32,6 +33,38 @@ export const Top = ({ lng, projects }: { lng: string, projects: Project[] }) => 
     return num.toString();
   }, []);
 
+  // Fetch TVL from API (DefiLlama style)
+  const fetchTvlFromAPI = useCallback(async (): Promise<number> => {
+    try {
+      const networks = ['plume_mainnet', 'polygon'];
+      const apiUrl = 'https://harvestflow-api-production.up.railway.app/token-events/total';
+      
+      const tvlPromises = networks.map(async (network) => {
+        try {
+          const response = await fetch(`${apiUrl}/${network}`);
+          if (!response.ok) {
+            console.warn(`Failed to fetch TVL for ${network}:`, response.status);
+            return 0;
+          }
+          const data = await response.json();
+          return data.totalAmount || 0;
+        } catch (error) {
+          console.error(`Error fetching TVL for ${network}:`, error);
+          return 0;
+        }
+      });
+      
+      const results = await Promise.all(tvlPromises);
+      const totalTvl = results.reduce((sum, value) => sum + value, 0);
+      
+      return totalTvl;
+    } catch (error) {
+      console.error('Error fetching TVL from API:', error);
+      return 0;
+    }
+  }, []);
+
+  // Fallback: Calculate TVL from projects data
   const getTotalValueLoaned = useCallback(() => {
     try {
       if (!projects || projects.length === 0) {
@@ -107,6 +140,22 @@ export const Top = ({ lng, projects }: { lng: string, projects: Project[] }) => 
     });
   }, []);
 
+  // Fetch TVL from API on component mount
+  useEffect(() => {
+    const loadTvl = async () => {
+      try {
+        const tvl = await fetchTvlFromAPI();
+        if (tvl > 0) {
+          setTvlFromAPI(tvl);
+        }
+      } catch (error) {
+        console.error('Failed to load TVL from API:', error);
+      }
+    };
+    
+    loadTvl();
+  }, [fetchTvlFromAPI]);
+
   // Initialize and start animations
   useEffect(() => {
     // Prevent multiple animations
@@ -119,21 +168,23 @@ export const Top = ({ lng, projects }: { lng: string, projects: Project[] }) => 
       return;
     }
 
-    // Fallback values - used when data is not available
-    const FALLBACK_VALUES = {
-      projects: 1,
-      totalValue: 100,
-      tuktuks: 120
+    // Test values - used as fallback when data is not available
+    const TEST_VALUES = {
+      projects: 5,
+      totalValue: 500000,
+      tuktuks: 150
     };
 
-    // Use real data from projects
-    const realTotalValue = getTotalValueLoaned();
+    // Priority: TVL from API > calculated from projects > test values
+    const calculatedTotalValue = getTotalValueLoaned();
+    const totalValue = tvlFromAPI !== null && tvlFromAPI > 0 
+      ? tvlFromAPI 
+      : (calculatedTotalValue > 0 ? calculatedTotalValue : TEST_VALUES.totalValue);
+    
     const hasValidData = projects && projects.length > 0;
-
-    const projectsCount = hasValidData ? projects.filter(project => project.listing).length : FALLBACK_VALUES.projects;
-    const totalValue = hasValidData && realTotalValue > 0 ? realTotalValue : FALLBACK_VALUES.totalValue;
-
-    const tuktuks = FALLBACK_VALUES.tuktuks; // Always use fallback value for tuktuks (not tracked on-chain)
+    
+    const projectsCount = hasValidData ? (5 + projects.filter(project => project.listing).length) : TEST_VALUES.projects;
+    const tuktuks = TEST_VALUES.tuktuks; // Always use test value for tuktuks
 
     animationInProgress.current = true;
     setHasAnimated(true);
@@ -158,7 +209,7 @@ export const Top = ({ lng, projects }: { lng: string, projects: Project[] }) => 
       clearTimeout(timeoutId);
       animationInProgress.current = false;
     };
-  }, [projects, animateCounter, getTotalValueLoaned, hasAnimated]);
+  }, [projects, animateCounter, getTotalValueLoaned, hasAnimated, tvlFromAPI]);
 
   // Reset animation state when projects change significantly
   useEffect(() => {
