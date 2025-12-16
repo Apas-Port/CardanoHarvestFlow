@@ -3,6 +3,7 @@
 ## Test Information
 - **Test Date**: YYYY-MM-DD
 - **Tester**: [Your Name]
+- **Role**: User / Dev / Both
 - **Environment**: preprod / mainnet
 - **Browser**: Chrome / Firefox / Safari / Edge
 - **Browser Version**: [e.g., Chrome 120.0]
@@ -13,70 +14,70 @@
 
 ## Test Results
 
-| # | Feature | Test Case | Expected Result | Actual Result | Status |
-|---|---------|-----------|-----------------|---------------|--------|
-| 1 | Wallet Connection | Connect wallet | Wallet connects successfully, address displayed | | PASS / FAIL / SKIP |
-| 2 | Wallet Connection | Disconnect wallet | Wallet disconnects, connection state cleared | | PASS / FAIL / SKIP |
-| 3 | Wallet Connection | Switch wallet | Can switch between different wallet providers | | PASS / FAIL / SKIP |
-| 4 | Wallet Connection | Wallet info display | Wallet address displayed correctly | | PASS / FAIL / SKIP |
-| 5 | Project Management | Project list display | All active projects displayed on homepage | | PASS / FAIL / SKIP |
-| 6 | Project Management | Project details view | Project details (APY, capacity, unit price) shown correctly | | PASS / FAIL / SKIP |
-| 7 | Project Management | Minted count display | Current minted count matches on-chain data | | PASS / FAIL / SKIP |
-| 8 | Project Management | Project status filter | Can filter projects by status (active/inactive) | | PASS / FAIL / SKIP |
-| 9 | NFT Minting | Single NFT mint | Single NFT minted successfully with correct metadata | | PASS / FAIL / SKIP |
-| 10 | NFT Minting | Token ID generation | Sequential token ID generated correctly (HARVESTFLOW#N) | | PASS / FAIL / SKIP |
-| 11 | NFT Minting | Metadata validation | NFT metadata (name, image, description) correct | | PASS / FAIL / SKIP |
-| 12 | NFT Minting | Mint price payment | Correct amount of ADA deducted from wallet | | PASS / FAIL / SKIP |
-| 13 | NFT Minting | Bulk mint (5 NFTs) | 5 NFTs minted successfully in single transaction | | PASS / FAIL / SKIP |
-| 14 | NFT Minting | Bulk mint (10 NFTs) | 15 NFTs minted successfully in single transaction | | PASS / FAIL / SKIP |
-| 15 | NFT Minting | Mint with insufficient funds | Error message shown when wallet balance insufficient | | PASS / FAIL / SKIP |
-| 16 | NFT Minting | Mint when minting disabled | Error message shown when minting is disabled | | PASS / FAIL / SKIP |
-| 17 | NFT Minting | Mint beyond max capacity | Error message shown when max mints reached | | PASS / FAIL / SKIP |
-| 18 | NFT Minting | Mint transaction confirmation | Transaction hash displayed after successful mint | | PASS / FAIL / SKIP |
-| 19 | NFT Minting | Mint status tracking | Loading states (signing, submitting) shown | | PASS / FAIL / SKIP |
-| 20 | Transaction Processing | Transaction submission | Transaction submitted to blockchain successfully | | PASS / FAIL / SKIP |
-| 21 | Transaction Processing | Transaction status check | Transaction status API returns correct status | | PASS / FAIL / SKIP |
-| 22 | Transaction Processing | Transaction error handling | Error messages displayed for failed transactions | | PASS / FAIL / SKIP |
-| 23 | Transaction Processing | Transaction timeout | Timeout handled gracefully after extended wait | | PASS / FAIL / SKIP |
-| 24 | Oracle Functionality | Oracle status check | Oracle status API returns correct state | | PASS / FAIL / SKIP |
-| 25 | Oracle Functionality | Oracle UTxO validation | Oracle UTxO found and validated correctly | | PASS / FAIL / SKIP |
-| 26 | Oracle Functionality | Oracle update handling | Oracle updates reflected in UI correctly | | PASS / FAIL / SKIP |
-| 27 | NFT Display | NFT list display | User's NFTs displayed in account page | | PASS / FAIL / SKIP |
-| 28 | NFT Display | NFT metadata display | NFT metadata (name, image, attributes) shown correctly | | PASS / FAIL / SKIP |
-| 29 | NFT Display | NFT filtering | Can categorize NFTs by project or collection | | PASS / FAIL / SKIP |
-| 30 | Account Page | Account dashboard | Account page loads with user's NFT collection | | PASS / FAIL / SKIP |
-| 31 | Account Page | Transaction history | Transaction history displayed correctly | | PASS / FAIL / SKIP |
-| 32 | Account Page | Project navigation | Can navigate to project details from account page | | PASS / FAIL / SKIP |
-| 33 | Proof Page | Proof of Support display | Proof page shows NFT details and project info | | PASS / FAIL / SKIP |
-| 34 | Proof Page | RWA data display | RWA project data shown correctly | | PASS / FAIL / SKIP |
-| 35 | Proof Page | Asset overview | Asset overview section displays correctly | | PASS / FAIL / SKIP |
-| 36 | API Endpoints | GET /api/cardano/mint | Mint data returned correctly | | PASS / FAIL / SKIP |
-| 37 | API Endpoints | POST /api/cardano/mint | Single NFT mint request processed | | PASS / FAIL / SKIP |
-| 38 | API Endpoints | POST /api/cardano/mint-bulk | Bulk mint request processed | | PASS / FAIL / SKIP |
-| 39 | API Endpoints | GET /api/cardano/status | Project status returned correctly | | PASS / FAIL / SKIP |
-| 40 | API Endpoints | POST /api/cardano/status | Status update processed correctly | | PASS / FAIL / SKIP |
-| 41 | API Endpoints | GET /api/nft/highest-id | Highest token ID returned correctly | | PASS / FAIL / SKIP |
-| 42 | API Endpoints | POST /api/nft/highest-id | Highest token ID updated correctly | | PASS / FAIL / SKIP |
-| 43 | API Endpoints | POST /api/nft/verify-metadata | Metadata verification works correctly | | PASS / FAIL / SKIP |
-| 44 | API Endpoints | GET /api/project/minted-count | Minted count returned correctly | | PASS / FAIL / SKIP |
-| 45 | API Endpoints | POST /api/project/update-minted-count | Minted count updated correctly | | PASS / FAIL / SKIP |
-| 46 | Error Handling | Network error | Graceful error handling when network fails | | PASS / FAIL / SKIP |
-| 47 | Error Handling | Wallet rejection | Error message shown when user rejects transaction | | PASS / FAIL / SKIP |
-| 48 | Error Handling | Invalid project ID | Error message shown for invalid project ID | | PASS / FAIL / SKIP |
-| 49 | Error Handling | Missing required fields | Validation errors shown for missing fields | | PASS / FAIL / SKIP |
-| 50 | UI/UX | Loading states | Loading indicators shown during async operations | | PASS / FAIL / SKIP |
-| 51 | UI/UX | Success messages | Success messages displayed after operations | | PASS / FAIL / SKIP |
-| 52 | UI/UX | Error messages | Error messages clear and actionable | | PASS / FAIL / SKIP |
-| 53 | UI/UX | Modal dialogs | Modals open and close correctly | | PASS / FAIL / SKIP |
-| 54 | UI/UX | Navigation | Navigation between pages works correctly | | PASS / FAIL / SKIP |
-| 55 | Internationalization | Language switching | Can switch between English and Japanese | | PASS / FAIL / SKIP |
-| 56 | Internationalization | Text translation | All text translated correctly | | PASS / FAIL / SKIP |
-| 57 | Airdrop/Refund | Airdrop execution | Airdrop script executes successfully | | PASS / FAIL / SKIP |
-| 58 | Airdrop/Refund | Refund distribution | Refunds distributed to NFT holders correctly | | PASS / FAIL / SKIP |
-| 59 | Airdrop/Refund | Airdrop log generation | Airdrop logs generated correctly | | PASS / FAIL / SKIP |
-| 60 | Admin Functions | Toggle minting | Admin can enable/disable minting for project | | PASS / FAIL / SKIP |
-| 61 | Admin Functions | Oracle test | Oracle test endpoint works correctly | | PASS / FAIL / SKIP |
-| 62 | Admin Functions | Config test | Config test endpoint works correctly | | PASS / FAIL / SKIP |
+| # | Feature | Test Case | Expected Result | Actual Result | Status | User/Dev |
+|---|---------|-----------|-----------------|---------------|--------|----------|
+| 1 | Wallet Connection | Connect wallet | Wallet connects successfully, address displayed | | PASS / FAIL / SKIP | User |
+| 2 | Wallet Connection | Disconnect wallet | Wallet disconnects, connection state cleared | | PASS / FAIL / SKIP | User |
+| 3 | Wallet Connection | Switch wallet | Can switch between different wallet providers | | PASS / FAIL / SKIP | User |
+| 4 | Wallet Connection | Wallet info display | Wallet address displayed correctly | | PASS / FAIL / SKIP | User |
+| 5 | Project Management | Project list display | All active projects displayed on homepage | | PASS / FAIL / SKIP | User |
+| 6 | Project Management | Project details view | Project details (APY, capacity, unit price) shown correctly | | PASS / FAIL / SKIP | User |
+| 7 | Project Management | Minted count display | Current minted count matches on-chain data | | PASS / FAIL / SKIP | User |
+| 8 | Project Management | Project status filter | Can filter projects by status (active/inactive) | | PASS / FAIL / SKIP | User |
+| 9 | NFT Minting | Single NFT mint | Single NFT minted successfully with correct metadata | | PASS / FAIL / SKIP | User |
+| 10 | NFT Minting | Token ID generation | Sequential token ID generated correctly (HARVESTFLOW#N) | | PASS / FAIL / SKIP | User |
+| 11 | NFT Minting | Metadata validation | NFT metadata (name, image, description) correct | | PASS / FAIL / SKIP | Both |
+| 12 | NFT Minting | Mint price payment | Correct amount of ADA deducted from wallet | | PASS / FAIL / SKIP | User |
+| 13 | NFT Minting | Bulk mint (5 NFTs) | 5 NFTs minted successfully in single transaction | | PASS / FAIL / SKIP | User |
+| 14 | NFT Minting | Bulk mint (10 NFTs) | 10 NFTs minted successfully in single transaction | | PASS / FAIL / SKIP | User |
+| 15 | NFT Minting | Mint with insufficient funds | Error message shown when wallet balance insufficient | | PASS / FAIL / SKIP | User |
+| 16 | NFT Minting | Mint when minting disabled | Error message shown when minting is disabled | | PASS / FAIL / SKIP | User |
+| 17 | NFT Minting | Mint beyond max capacity | Error message shown when max mints reached | | PASS / FAIL / SKIP | User |
+| 18 | NFT Minting | Mint transaction confirmation | Transaction hash displayed after successful mint | | PASS / FAIL / SKIP | User |
+| 19 | NFT Minting | Mint status tracking | Loading states (signing, submitting) shown | | PASS / FAIL / SKIP | User |
+| 20 | Transaction Processing | Transaction submission | Transaction submitted to blockchain successfully | | PASS / FAIL / SKIP | Both |
+| 21 | Transaction Processing | Transaction status check | Transaction status API returns correct status | | PASS / FAIL / SKIP | Both |
+| 22 | Transaction Processing | Transaction error handling | Error messages displayed for failed transactions | | PASS / FAIL / SKIP | Both |
+| 23 | Transaction Processing | Transaction timeout | Timeout handled gracefully after extended wait | | PASS / FAIL / SKIP | Both |
+| 24 | Oracle Functionality | Oracle status check | Oracle status API returns correct state | | PASS / FAIL / SKIP | Both |
+| 25 | Oracle Functionality | Oracle UTxO validation | Oracle UTxO found and validated correctly | | PASS / FAIL / SKIP | Both |
+| 26 | Oracle Functionality | Oracle update handling | Oracle updates reflected in UI correctly | | PASS / FAIL / SKIP | Both |
+| 27 | NFT Display | NFT list display | User's NFTs displayed in account page | | PASS / FAIL / SKIP | User |
+| 28 | NFT Display | NFT metadata display | NFT metadata (name, image, attributes) shown correctly | | PASS / FAIL / SKIP | User |
+| 29 | NFT Display | NFT filtering | Can categorize NFTs by project or collection | | PASS / FAIL / SKIP | User |
+| 30 | Account Page | Account dashboard | Account page loads with user's NFT collection | | PASS / FAIL / SKIP | User |
+| 31 | Account Page | Transaction history | Transaction history displayed correctly | | PASS / FAIL / SKIP | User |
+| 32 | Account Page | Project navigation | Can navigate to project details from account page | | PASS / FAIL / SKIP | User |
+| 33 | Proof Page | Proof of Support display | Proof page shows NFT details and project info | | PASS / FAIL / SKIP | User |
+| 34 | Proof Page | RWA data display | RWA project data shown correctly | | PASS / FAIL / SKIP | User |
+| 35 | Proof Page | Asset overview | Asset overview section displays correctly | | PASS / FAIL / SKIP | User |
+| 36 | API Endpoints | GET /api/cardano/mint | Mint data returned correctly | | PASS / FAIL / SKIP | Dev |
+| 37 | API Endpoints | POST /api/cardano/mint | Single NFT mint request processed | | PASS / FAIL / SKIP | Dev |
+| 38 | API Endpoints | POST /api/cardano/mint-bulk | Bulk mint request processed | | PASS / FAIL / SKIP | Dev |
+| 39 | API Endpoints | GET /api/cardano/status | Project status returned correctly | | PASS / FAIL / SKIP | Dev |
+| 40 | API Endpoints | POST /api/cardano/status | Status update processed correctly | | PASS / FAIL / SKIP | Dev |
+| 41 | API Endpoints | GET /api/nft/highest-id | Highest token ID returned correctly | | PASS / FAIL / SKIP | Dev |
+| 42 | API Endpoints | POST /api/nft/highest-id | Highest token ID updated correctly | | PASS / FAIL / SKIP | Dev |
+| 43 | API Endpoints | POST /api/nft/verify-metadata | Metadata verification works correctly | | PASS / FAIL / SKIP | Dev |
+| 44 | API Endpoints | GET /api/project/minted-count | Minted count returned correctly | | PASS / FAIL / SKIP | Dev |
+| 45 | API Endpoints | POST /api/project/update-minted-count | Minted count updated correctly | | PASS / FAIL / SKIP | Dev |
+| 46 | Error Handling | Network error | Graceful error handling when network fails | | PASS / FAIL / SKIP | Both |
+| 47 | Error Handling | Wallet rejection | Error message shown when user rejects transaction | | PASS / FAIL / SKIP | User |
+| 48 | Error Handling | Invalid project ID | Error message shown for invalid project ID | | PASS / FAIL / SKIP | Both |
+| 49 | Error Handling | Missing required fields | Validation errors shown for missing fields | | PASS / FAIL / SKIP | Both |
+| 50 | UI/UX | Loading states | Loading indicators shown during async operations | | PASS / FAIL / SKIP | Both |
+| 51 | UI/UX | Success messages | Success messages displayed after operations | | PASS / FAIL / SKIP | Both |
+| 52 | UI/UX | Error messages | Error messages clear and actionable | | PASS / FAIL / SKIP | Both |
+| 53 | UI/UX | Modal dialogs | Modals open and close correctly | | PASS / FAIL / SKIP | Both |
+| 54 | UI/UX | Navigation | Navigation between pages works correctly | | PASS / FAIL / SKIP | Both |
+| 55 | Internationalization | Language switching | Can switch between English and Japanese | | PASS / FAIL / SKIP | User |
+| 56 | Internationalization | Text translation | All text translated correctly | | PASS / FAIL / SKIP | User |
+| 57 | Airdrop/Refund | Airdrop execution | Airdrop script executes successfully | | PASS / FAIL / SKIP | Dev |
+| 58 | Airdrop/Refund | Refund distribution | Refunds distributed to NFT holders correctly | | PASS / FAIL / SKIP | Dev |
+| 59 | Airdrop/Refund | Airdrop log generation | Airdrop logs generated correctly | | PASS / FAIL / SKIP | Dev |
+| 60 | Admin Functions | Toggle minting | Admin can enable/disable minting for project | | PASS / FAIL / SKIP | Dev |
+| 61 | Admin Functions | Oracle test | Oracle test endpoint works correctly | | PASS / FAIL / SKIP | Dev |
+| 62 | Admin Functions | Config test | Config test endpoint works correctly | | PASS / FAIL / SKIP | Dev |
 
 ## Test Summary
 
