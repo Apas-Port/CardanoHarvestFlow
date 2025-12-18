@@ -38,7 +38,7 @@
     "googleapis": "^160.0.0",
     "lucid-cardano": "^0.10.11",
     "motion": "^12.23.12",
-    "next": "14.2.13",
+    "next": "14.2.35",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
