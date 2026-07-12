@@ -296,6 +296,41 @@ export class ProxiedBlockfrostProvider extends BlockfrostProvider {
   }
 
   /**
+   * Override fetchCostModels to use proxy
+   *
+   * MeshTxBuilder calls this to compute the script integrity hash with the
+   * current on-chain cost models (updated by the van Rossem upgrade).
+   * Without this override the parent class would call Blockfrost directly
+   * with the dummy API key, fail, and fall back to stale defaults.
+   */
+  async fetchCostModels(epoch?: number): Promise<number[][]> {
+    const endpoint = epoch !== undefined
+      ? `/epochs/${epoch}/parameters`
+      : `/epochs/latest/parameters`;
+
+    const response = await fetch(this.proxyEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint, method: 'GET' }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch cost models: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (!data?.cost_models_raw?.PlutusV1) {
+      throw new Error('Cost models are not available from Blockfrost API.');
+    }
+
+    return [
+      data.cost_models_raw.PlutusV1,
+      data.cost_models_raw.PlutusV2,
+      data.cost_models_raw.PlutusV3,
+    ];
+  }
+
+  /**
    * Override fetchProtocolParameters to use proxy
    */
   async fetchProtocolParameters(epoch?: number): Promise<Protocol> {
