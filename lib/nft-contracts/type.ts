@@ -39,7 +39,7 @@ export type OracleRedeemerData =
     | "EnableNFTTrading"
     | "DisableNFTTrading"
 
-export type OracleRedeemer = ConStr0<never[]> | ConStr<1, number[]> | ConStr<2, never[]> | ConStr<3, never[]> | ConStr<4, never[]> | ConStr<5, never[]> | ConStr<6, never[]>;
+export type OracleRedeemer = ConStr0<never[]> | ConStr<1, Integer[]> | ConStr<2, never[]> | ConStr<3, never[]> | ConStr<4, never[]> | ConStr<5, never[]> | ConStr<6, never[]>;
 export type MOracleRedeemer = MConStr<0, never[]> | MConStr<1, Data[]> | MConStr<2, never[]> | MConStr<3, never[]> | MConStr<4, never[]> | MConStr<5, never[]> | MConStr<6, never[]>;
 export function oracleRedeemer(redeemer: OracleRedeemerData, quantity?: number): OracleRedeemer {
     switch (redeemer) {
@@ -53,8 +53,8 @@ export function oracleRedeemer(redeemer: OracleRedeemerData, quantity?: number):
             if (!Number.isFinite(quantityNumForConStr) || quantityNumForConStr <= 0) {
                 throw new Error(`BulkMintPlutusNFT requires a positive number for quantity, got: ${quantity} (type: ${typeof quantity})`);
             }
-            // mRBulkMintと同じ方法で直接数値を渡す
-            return conStr(1, [quantityNumForConStr]);
+            // JSON-style datum requires Integer-wrapped values
+            return conStr(1, [integer(quantityNumForConStr)]);
         case "StopOracle": return conStr(2, []);
         case "EnableNFTMinting": return conStr(3, []);
         case "DisableNFTMinting": return conStr(4, []);

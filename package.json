@@ -19,11 +19,19 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "pnpm": {
+    "overrides": {
+      "libsodium-wrappers-sumo": "0.7.15",
+      "libsodium-sumo": "0.7.15",
+      "@peculiar/webcrypto": "1.5.0"
+    }
+  },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.4",
-    "@meshsdk/common": "1.9.0-beta.72",
-    "@meshsdk/core": "1.9.0-beta.72",
-    "@meshsdk/core-csl": "1.9.0-beta.72",
+    "@bufbuild/protobuf": "^1.10.1",
+    "@meshsdk/common": "1.9.1",
+    "@meshsdk/core": "1.9.1",
+    "@meshsdk/core-csl": "1.9.1",
     "@meshsdk/react": "1.9.0-beta.72",
     "@popperjs/core": "^2.11.8",
     "@sidan-lab/sidan-csl-rs-nodejs": "^0.9.21",
