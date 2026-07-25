@@ -15,7 +15,7 @@ import Video from './Video';
 import Ecosystem from './Ecosystem';
 import PurchaseModal from '@/components/modal/PurchaseModal';
 import ProjectWaitingListModal from '@/components/modal/ProjectWaitingListModal'; // Import ProjectWaitingListModal
-import { getProjectData, Project } from '@/lib/project';
+import { getProjectData, invalidateProjectCache, Project } from '@/lib/project';
 import { motion } from "motion/react"
 
 import TransactionSuccessfulModal from '@/components/modal/TransactionSuccessfulModal';
@@ -28,6 +28,10 @@ import ProofOfSupportArtists from './ProofOfSupportArtists';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/i18n/client';
 import { useCardanoAPIMint } from '@/hooks/useCardanoAPIMint';
+
+/** Roughly 100s of polling — a Cardano block is ~20s, so this covers a few blocks. */
+const PROJECT_REFRESH_ATTEMPTS = 10;
+const PROJECT_REFRESH_INTERVAL_MS = 10_000;
 
 export const TopPage = ({ lng, onLoaded }: { lng: string; onLoaded?: () => void }) => {
   const router = useRouter();
@@ -62,7 +66,52 @@ export const TopPage = ({ lng, onLoaded }: { lng: string; onLoaded?: () => void 
   const registerStatus = null;
   const registerError = null;
 
-  const execLendSupport = async (params: { project: Project; quantity: number }) => { 
+  /**
+   * Re-reads the project list so mintedAmount / raisedAmount reflect a new NFT.
+   * The modals render `selectedProject`, so that snapshot has to be replaced too —
+   * updating `projects` alone leaves an open modal showing the old amount.
+   */
+  const refreshProjects = async (projectId?: string): Promise<Project[]> => {
+    try {
+      invalidateProjectCache();
+      const freshProjects = await getProjectData();
+      setProjects(freshProjects);
+
+      const updated = projectId ? freshProjects.find((p) => p.id === projectId) : undefined;
+      if (updated) {
+        setSelectedProject(updated);
+      }
+
+      return freshProjects;
+    } catch (error) {
+      console.error('Failed to refresh project data:', error);
+      return [];
+    }
+  };
+
+  /**
+   * Blockfrost only reports the new asset once the minting transaction is in a
+   * block, so a single refresh right after submitting still returns the old
+   * count. Poll until the count actually moves, then stop.
+   */
+  const refreshProjectsAfterMint = async (projectId: string, mintedBefore: number) => {
+    for (let attempt = 0; attempt < PROJECT_REFRESH_ATTEMPTS; attempt += 1) {
+      const freshProjects = await refreshProjects(projectId);
+      const updated = freshProjects.find((p) => p.id === projectId);
+
+      if (updated && Number(updated.mintedAmount) > mintedBefore) {
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, PROJECT_REFRESH_INTERVAL_MS));
+    }
+
+    console.warn(
+      `[TopPage] Minted count for project ${projectId} did not increase within the refresh window.`,
+    );
+  };
+
+  const execLendSupport = async (params: { project: Project; quantity: number }) => {
     console.log('execLendSupport called', params);
     
     try {
@@ -94,6 +143,9 @@ export const TopPage = ({ lng, onLoaded }: { lng: string; onLoaded?: () => void 
         // Set up success data for TransactionSuccessfulModal
         // Show success modal
         setIsTransactionSuccessModalOpen(true);
+
+        // Not awaited: the success modal should not wait on chain confirmation.
+        void refreshProjectsAfterMint(params.project.id, Number(params.project.mintedAmount ?? 0));
       } else {
         console.error('Minting failed - no result');
         throw new Error('Minting failed');

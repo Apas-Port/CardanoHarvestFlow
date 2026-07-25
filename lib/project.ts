@@ -66,6 +66,26 @@ export interface Project {
 
 let cachedProjects: Project[] | null = null;
 let cachedIsMainnet: boolean | null = null;
+let cachedAt = 0;
+
+/**
+ * How long the enhanced project list may be reused.
+ *
+ * The list embeds `mintedAmount` / `raisedAmount`, which change every time
+ * someone mints, so the cache cannot live for the lifetime of the page — it made
+ * "Raised to date" freeze at whatever it was on first load.
+ */
+const PROJECT_CACHE_TTL_MS = 30_000;
+
+/**
+ * Drops the cached project list so the next `getProjectData()` refetches.
+ * Call this after a mint so the raised amount reflects the new NFT.
+ */
+export const invalidateProjectCache = (): void => {
+  cachedProjects = null;
+  cachedIsMainnet = null;
+  cachedAt = 0;
+};
 
 export const matchNFTContractAddressWithProjects = async (contractAddress: string, source?: Request | URL | string): Promise<Project | null> => {
   // Always call getProjectData to handle cache invalidation
@@ -123,17 +143,17 @@ export const getProjectData = async (source?: Request | URL | string): Promise<P
     // Clear cache if network changed (e.g., ?dev parameter added/removed)
     if (cachedIsMainnet !== null && cachedIsMainnet !== shouldUseMainnet) {
       console.log('[project] Network changed, clearing cache');
-      cachedProjects = null;
-      cachedIsMainnet = null;
+      invalidateProjectCache();
     }
 
     if (bypassCache) {
-      cachedProjects = null;
-      cachedIsMainnet = null;
+      invalidateProjectCache();
     }
 
-    // Return cached projects if available and network hasn't changed
-    if (!bypassCache && cachedProjects !== null && cachedIsMainnet === shouldUseMainnet) {
+    // Return cached projects if available, still fresh, and the network hasn't changed
+    const isCacheFresh = Date.now() - cachedAt < PROJECT_CACHE_TTL_MS;
+
+    if (!bypassCache && cachedProjects !== null && cachedIsMainnet === shouldUseMainnet && isCacheFresh) {
       console.log('[project] Returning cached projects');
       return cachedProjects;
     }
@@ -240,6 +260,7 @@ export const getProjectData = async (source?: Request | URL | string): Promise<P
     if (!bypassCache) {
       cachedProjects = enhancedProjects;
       cachedIsMainnet = shouldUseMainnet;
+      cachedAt = Date.now();
       console.log('[project] Cached projects updated');
     }
 

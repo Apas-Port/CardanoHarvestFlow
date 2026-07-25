@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getNetworkImage } from '@/lib/network';
 import { Project } from '@/lib/project';
+import { resolveProjectNftImage } from '@/lib/nft-images';
 
 interface CardanoNFTCardProps {
   nft: {
@@ -33,8 +34,6 @@ const CardanoNFTCard: React.FC<CardanoNFTCardProps> = ({ nft, project }) => {
   // Extract serial number from various sources
   let serialNumber = nft.metadata?.serialNumber || nft.metadata?.name?.split("#")[1] || '9';
   
-  console.log("CardanoNFTCard", project)
-
   // If serialNumber is empty string, try to extract from name
   if (serialNumber === '' || !serialNumber) {
     if (nft.metadata?.name) {
@@ -49,7 +48,8 @@ const CardanoNFTCard: React.FC<CardanoNFTCardProps> = ({ nft, project }) => {
   serialNumber = serialNumber.toString() || '1';
   
   const projectName = project?.title || nft.metadata?.project || 'Harvestflow';
-  const imageUrl = "/images/project/1/preview.jpg"; // project?.previewImage || nft.metadata?.image || nft.metadata?.files?.[0]?.src || null;
+  // The artwork is served from public/ rather than an IPFS gateway — see lib/nft-images.ts.
+  const imageUrl = nft.metadata?.image || resolveProjectNftImage(project);
   
   // Use project data if available, otherwise use defaults
   const apr = project?.apy;
@@ -89,7 +89,7 @@ const CardanoNFTCard: React.FC<CardanoNFTCardProps> = ({ nft, project }) => {
             <div
               className="bg-no-repeat bg-center bg-cover w-full mt-[26%] opacity-80 relative overflow-hidden"
               style={{
-                backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+                backgroundImage: imageUrl ? `url("${imageUrl}")` : 'none',
                 backgroundColor: !imageUrl ? '#f3f4f6' : 'transparent',
                 aspectRatio: "26 / 31",
               }}
