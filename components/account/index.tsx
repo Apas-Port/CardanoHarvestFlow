@@ -10,6 +10,7 @@ import DesktopVideoBackground from "@/components/common/DesktopVideoBackground";
 import MobileVideoBackground from "@/components/common/MobileVideoBackground";
 import CommonHeader from "@/components/common/CommonHeader";
 import { Project, getProjectData } from "@/lib/project";
+import { resolveProjectNftImage } from "@/lib/nft-images";
 import { TokenEvent } from "@/lib/types";
 import { appendDevQuery } from "@/lib/dev-mode";
 import { useWallet } from '@meshsdk/react';
@@ -461,11 +462,10 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
               const rawAssetName = coerceToString(asset.assetName) ?? assetNameHex;
               const decodedAssetName = decodeAssetName(rawAssetName);
 
-              const onChainMetadata = (asset.metadata ?? {}) as Record<string, unknown>;
-              const metadataSerial = coerceToString(onChainMetadata.serialNumber ?? onChainMetadata.tokenId);
-              const metadataName = coerceToString(onChainMetadata.name);
-              const metadataImage = coerceToString(onChainMetadata.image);
-              const metadataDescription = coerceToString(onChainMetadata.description);
+              // NOTE: Mesh's BrowserWallet.getAssets() returns only
+              // { unit, policyId, assetName, fingerprint, quantity } — there is no
+              // on-chain metadata to read here. Name, serial and artwork are therefore
+              // derived from the asset name and projects.json instead.
 
               // projects.jsonを正として、そこに定義されたプロジェクトのpolicyIdにマッチするNFTのみを処理
               const matchingEntry = normalizedProjects.find((entry) =>
@@ -483,34 +483,22 @@ const Account: React.FC<AccountProps> = ({ lng }) => {
               console.log(`Matched NFT with policyId ${policyIdRaw} to project ${matchingProject.id} (${matchingProject.title})`);
 
               const serialFromName = extractSerialNumber(decodedAssetName);
-              const serialNumber = metadataSerial ?? serialFromName ?? undefined;
+              const serialNumber = serialFromName ?? undefined;
               const tokenId = serialNumber ?? undefined;
-              const defaultImage = '/images/default-nft.png';
-
-              let metadata: ParsedCardanoNftMetadata = {
-                name: decodedAssetName || 'Cardano NFT',
-                image: defaultImage,
-                description: decodedAssetName ? `Cardano NFT: ${decodedAssetName}` : 'Cardano NFT',
-              };
 
               const projectSerial = serialNumber ?? '0';
-              const projectImage = metadataImage ?? matchingProject.previewImage ?? matchingProject.mainImage ?? defaultImage;
+              // Resolves to the locally bundled artwork for the project's IPFS CID.
+              const projectImage = resolveProjectNftImage(matchingProject) ?? undefined;
               const displayNameBase = matchingProject.collectionName ?? matchingProject.title;
 
-              metadata = {
-                ...metadata,
-                name: metadataName ?? `${displayNameBase} #${projectSerial}`,
+              const metadata: ParsedCardanoNftMetadata = {
+                name: `${displayNameBase} #${projectSerial}`,
                 image: projectImage,
-                description:
-                  metadataDescription ?? `Proof of Support NFT for ${matchingProject.title}`,
+                description: `Proof of Support NFT for ${matchingProject.title}`,
                 project: matchingProject.title,
                 projectId: matchingProject.id,
                 serialNumber: projectSerial,
               };
-
-              if (Array.isArray(onChainMetadata.attributes)) {
-                metadata.attributes = onChainMetadata.attributes;
-              }
 
               return {
                 unit,
