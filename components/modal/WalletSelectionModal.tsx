@@ -1,51 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useWalletPersistence } from '@/hooks/useWalletPersistence';
+'use client';
 
-// Wallet configurations
-const SUPPORTED_WALLETS = [
-  {
-    name: 'nami',
-    displayName: 'Nami',
-    color: 'from-orange-400 to-orange-600',
-    window: 'nami',
-    icon: '🦊'
-  },
-  {
-    name: 'lace',
-    displayName: 'Lace',
-    color: 'from-purple-400 to-purple-600',
-    window: 'lace',
-    icon: '💜'
-  },
-  {
-    name: 'eternl',
-    displayName: 'Eternl',
-    color: 'from-blue-400 to-blue-600',
-    window: 'eternl',
-    icon: '🔷'
-  },
-  {
-    name: 'flint',
-    displayName: 'Flint',
-    color: 'from-red-400 to-red-600',
-    window: 'flint',
-    icon: '🔥'
-  },
-  {
-    name: 'yoroi',
-    displayName: 'Yoroi',
-    color: 'from-cyan-400 to-cyan-600',
-    window: 'yoroi',
-    icon: '🌊'
-  },
-  {
-    name: 'typhoncip30',
-    displayName: 'Typhon',
-    color: 'from-gray-400 to-gray-600',
-    window: 'typhoncip30',
-    icon: '🌪️'
-  }
-];
+import React, { useState } from 'react';
+import { useWalletPersistence } from '@/hooks/useWalletPersistence';
+import { useInstalledCardanoWallets } from '@/hooks/useInstalledCardanoWallets';
 
 interface WalletSelectionModalProps {
   isOpen: boolean;
@@ -55,48 +12,16 @@ interface WalletSelectionModalProps {
 
 const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({ isOpen, onClose, onWalletConnected }) => {
   const { connectAndSave } = useWalletPersistence();
-  const [availableWallets, setAvailableWallets] = useState<typeof SUPPORTED_WALLETS>([]);
+  const { wallets, status, detectedKeys, refresh } = useInstalledCardanoWallets({ enabled: isOpen });
   const [connecting, setConnecting] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
 
-  const checkAvailableWallets = useCallback(async () => {
-    const available = [];
-    
-    if (typeof window !== 'undefined' && window.cardano) {
-      for (const walletConfig of SUPPORTED_WALLETS) {
-        try {
-          const walletExists = window.cardano[walletConfig.window] !== undefined;
-          if (walletExists) {
-            available.push(walletConfig);
-          }
-        } catch (e) {
-          console.error(`Error checking ${walletConfig.displayName}:`, e);
-        }
-      }
-    }
-    
-    setAvailableWallets(available);
-    
-    // If no wallets found, wait and retry
-    if (available.length === 0 && isOpen) {
-      setTimeout(() => {
-        void checkAvailableWallets();
-      }, 1000);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      void checkAvailableWallets();
-    }
-  }, [isOpen, checkAvailableWallets]);
-
-  const connectWallet = async (walletName: string) => {
-    setConnecting(walletName);
+  const connectWallet = async (walletId: string) => {
+    setConnecting(walletId);
     setError('');
-    
+
     try {
-      const success = await connectAndSave(walletName);
+      const success = await connectAndSave(walletId);
       if (success) {
         onWalletConnected();
         onClose();
@@ -142,7 +67,7 @@ const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({ isOpen, onC
             </div>
           )}
 
-          {availableWallets.length === 0 ? (
+          {status === 'detecting' && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600 mb-2">Detecting wallets...</p>
@@ -150,27 +75,61 @@ const WalletSelectionModal: React.FC<WalletSelectionModalProps> = ({ isOpen, onC
                 Make sure you have a Cardano wallet extension installed
               </p>
             </div>
-          ) : (
+          )}
+
+          {status === 'not-found' && (
+            <div className="py-6">
+              <p className="text-gray-800 font-medium mb-3 text-center">
+                No Cardano wallet detected
+              </p>
+              <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1 mb-4">
+                <li>Install a Cardano wallet extension (Eternl, Lace, Yoroi, ...) on a desktop browser.</li>
+                <li>
+                  Enable the wallet&apos;s <span className="font-medium">dApp connector</span> — Eternl and
+                  Yoroi do not expose themselves to websites while it is turned off.
+                </li>
+                <li>Reload this page after installing or enabling the extension.</li>
+              </ul>
+              <p className="text-xs text-gray-500 mb-4 break-all">
+                Detected <code>window.cardano</code> keys:{' '}
+                {detectedKeys.length > 0 ? detectedKeys.join(', ') : 'none'}
+              </p>
+              <div className="text-center">
+                <button
+                  onClick={refresh}
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                >
+                  Try detecting again
+                </button>
+              </div>
+            </div>
+          )}
+
+          {status === 'ready' && (
             <>
               <p className="text-sm text-gray-600 mb-4">Choose your preferred Cardano wallet:</p>
               <div className="space-y-3">
-                {availableWallets.map((wallet) => (
+                {wallets.map((wallet) => (
                   <button
-                    key={wallet.name}
-                    onClick={() => connectWallet(wallet.name)}
+                    key={wallet.id}
+                    onClick={() => connectWallet(wallet.id)}
                     disabled={connecting !== null}
                     className={`w-full relative p-4 rounded-lg border-2 transition-all ${
-                      connecting === wallet.name 
-                        ? 'border-blue-400 bg-blue-50' 
+                      connecting === wallet.id
+                        ? 'border-blue-400 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                     } disabled:opacity-75 disabled:cursor-not-allowed`}
                   >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${wallet.color} opacity-5 rounded-lg`}></div>
                     <div className="relative flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="font-medium text-gray-800">{wallet.displayName}</span>
+                        {wallet.icon && (
+                          // The icon is a data-uri supplied by the extension, so next/image is not applicable.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={wallet.icon} alt="" className="w-6 h-6 rounded" />
+                        )}
+                        <span className="font-medium text-gray-800">{wallet.name}</span>
                       </div>
-                      {connecting === wallet.name && (
+                      {connecting === wallet.id && (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
                       )}
                     </div>
