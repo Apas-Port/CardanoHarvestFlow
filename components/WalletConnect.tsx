@@ -3,46 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useWallet } from '@meshsdk/react'
 import type { Asset } from '@meshsdk/common'
-
-// Wallet configurations
-const SUPPORTED_WALLETS = [
-  {
-    name: 'nami',
-    displayName: 'Nami',
-    color: 'from-orange-400 to-orange-600',
-    window: 'nami'
-  },
-  {
-    name: 'lace',
-    displayName: 'Lace',
-    color: 'from-purple-400 to-purple-600',
-    window: 'lace'
-  },
-  {
-    name: 'eternl',
-    displayName: 'Eternl',
-    color: 'from-blue-400 to-blue-600',
-    window: 'eternl'
-  },
-  {
-    name: 'flint',
-    displayName: 'Flint',
-    color: 'from-red-400 to-red-600',
-    window: 'flint'
-  },
-  {
-    name: 'yoroi',
-    displayName: 'Yoroi',
-    color: 'from-cyan-400 to-cyan-600',
-    window: 'yoroi'
-  },
-  {
-    name: 'typhoncip30',
-    displayName: 'Typhon',
-    color: 'from-gray-400 to-gray-600',
-    window: 'typhoncip30'
-  }
-]
+import { useInstalledCardanoWallets } from '@/hooks/useInstalledCardanoWallets'
 
 type BalanceEntry = {
   unit: string
@@ -107,44 +68,15 @@ export default function WalletConnect() {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [showWalletList, setShowWalletList] = useState(false)
-  const [availableWallets, setAvailableWallets] = useState<typeof SUPPORTED_WALLETS>([])
   const [connecting, setConnecting] = useState<string | null>(null)
-  const [debugInfo, setDebugInfo] = useState<string>('')
   const [isGettingWalletInfo, setIsGettingWalletInfo] = useState(false)
 
-  const checkAvailableWallets = useCallback(async () => {
-    const available = []
-    let debug = 'Wallet detection debug:\n'
-    
-    // Check if window.cardano exists
-    if (typeof window !== 'undefined' && window.cardano) {
-      debug += 'window.cardano found\n'
-      
-      for (const walletConfig of SUPPORTED_WALLETS) {
-        try {
-          // Direct check on window.cardano
-          const walletExists = window.cardano[walletConfig.window] !== undefined
-          debug += `${walletConfig.displayName} (${walletConfig.window}): ${walletExists ? 'Found' : 'Not found'}\n`
-          
-          if (walletExists) {
-            available.push(walletConfig)
-          }
-        } catch (e) {
-          debug += `${walletConfig.displayName}: Error checking - ${e}\n`
-        }
-      }
-    } else {
-      debug += 'window.cardano not found - waiting for extensions to load\n'
-      
-      // Wait a bit for extensions to load
-      setTimeout(() => {
-        void checkAvailableWallets()
-      }, 1000)
-    }
-    
-    setDebugInfo(debug)
-    setAvailableWallets(available)
-  }, [])
+  const {
+    wallets: availableWallets,
+    status: detectionStatus,
+    detectedKeys,
+    refresh: refreshWallets,
+  } = useInstalledCardanoWallets({ enabled: !connected })
 
   const connectWallet = useCallback(async (walletName: string) => {
     setConnecting(walletName)
@@ -354,8 +286,6 @@ export default function WalletConnect() {
   }, [wallet, isGettingWalletInfo, disconnect])
 
   useEffect(() => {
-    void checkAvailableWallets()
-
     if (!connected) {
       const savedWallet = localStorage.getItem('connectedWallet')
       if (savedWallet) {
@@ -368,11 +298,7 @@ export default function WalletConnect() {
     }
 
     return undefined
-  }, [checkAvailableWallets, connectWallet, connected])
-
-  useEffect(() => {
-    void checkAvailableWallets()
-  }, [showWalletList, checkAvailableWallets])
+  }, [connectWallet, connected])
 
   useEffect(() => {
     if (connected && wallet) {
@@ -441,45 +367,61 @@ export default function WalletConnect() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">ウォレットを選択</h3>
                 
-                {/* Debug info */}
-                {process.env.NODE_ENV === 'development' && (
-                  <details className="mb-4 text-xs bg-gray-100 p-3 rounded">
-                    <summary className="cursor-pointer font-mono">Debug Info</summary>
-                    <pre className="mt-2 whitespace-pre-wrap">{debugInfo}</pre>
-                  </details>
-                )}
-                
-                {availableWallets.length === 0 ? (
+                {detectionStatus === 'detecting' && (
                   <div className="text-center py-8">
-                    <p className="text-gray-600 mb-4">利用可能なウォレットが見つかりません</p>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Cardanoウォレット拡張機能をインストールしてください
-                    </p>
-                    <button
-                      onClick={checkAvailableWallets}
-                      className="text-blue-600 hover:text-blue-700 text-sm"
-                    >
-                      再度検出を試す
-                    </button>
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">ウォレットを検出中...</p>
                   </div>
-                ) : (
+                )}
+
+                {detectionStatus === 'not-found' && (
+                  <div className="py-6">
+                    <p className="text-gray-800 font-medium mb-3 text-center">
+                      利用可能なウォレットが見つかりません
+                    </p>
+                    <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1 mb-4">
+                      <li>PCのブラウザに Cardano ウォレット拡張機能（Eternl、Lace、Yoroi など）をインストールしてください。</li>
+                      <li>
+                        ウォレット側の <span className="font-medium">dApp connector</span> を有効にしてください。
+                        Eternl と Yoroi は無効のままだとサイトから認識できません。
+                      </li>
+                      <li>インストール・有効化のあとにページを再読み込みしてください。</li>
+                    </ul>
+                    <p className="text-xs text-gray-500 mb-4 break-all">
+                      検出された <code>window.cardano</code> のキー:{' '}
+                      {detectedKeys.length > 0 ? detectedKeys.join(', ') : 'なし'}
+                    </p>
+                    <div className="text-center">
+                      <button
+                        onClick={refreshWallets}
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        再度検出を試す
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {detectionStatus === 'ready' && (
                   <div className="grid grid-cols-2 gap-3">
                     {availableWallets.map((wallet) => (
                       <button
-                        key={wallet.name}
-                        onClick={() => connectWallet(wallet.name)}
+                        key={wallet.id}
+                        onClick={() => connectWallet(wallet.id)}
                         disabled={connecting !== null}
                         className={`relative p-4 rounded-lg border-2 border-gray-200 hover:border-gray-300 transition-all ${
-                          connecting === wallet.name ? 'opacity-75' : 'hover:shadow-md'
+                          connecting === wallet.id ? 'opacity-75' : 'hover:shadow-md'
                         } disabled:cursor-not-allowed`}
                       >
-                        <div className={`absolute inset-0 bg-gradient-to-br ${wallet.color} opacity-10 rounded-lg`}></div>
-                        <div className="relative">
-                          <p className="font-medium text-gray-800">{wallet.displayName}</p>
-                          {connecting === wallet.name && (
-                            <div className="mt-2">
-                              <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
-                            </div>
+                        <div className="relative flex flex-col items-center gap-2">
+                          {wallet.icon && (
+                            // The icon is a data-uri supplied by the extension, so next/image is not applicable.
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={wallet.icon} alt="" className="w-8 h-8 rounded" />
+                          )}
+                          <p className="font-medium text-gray-800">{wallet.name}</p>
+                          {connecting === wallet.id && (
+                            <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
                           )}
                         </div>
                       </button>
